@@ -12,7 +12,7 @@
 
 ​	若遇到环境变量相关问题还请自行搜索或询问gpt。
 
-使用VScode打开项目文件夹，在终端（按ctrl+`快捷键打开）中安装以下内容：
+使用VScode打开项目文件夹（运行前端部分时打开front_end文件夹），在终端（按ctrl+`快捷键打开）中安装以下内容（均在front_end文件夹中进行安装和运行）：
 
 ​	element plus安装：pnpm install element-plus
 
