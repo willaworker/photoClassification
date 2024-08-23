@@ -1,35 +1,26 @@
-# photoClassification
+## **项目运行指南**
 
-This template should help get you started developing with Vue 3 in Vite.
+本项目使用的技术栈有pnpm、VUE、element plus、echarts、axios、less、sass，需要安装对应的环境。
 
-## Recommended IDE Setup
+**项目前提**：需要18.3或更高版本的node.js，可在windows powershell（管理员）内输入node -v查看，若无，则建议浏览器搜索安装方法。
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+打开windows powershell（管理员），运行以下内容：
 
-## Customize configuration
+​	pnpm安装：npm install -g pnpm
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+​	axios安装：pnpm install axios -g
 
-## Project Setup
+​	若遇到环境变量相关问题还请自行搜索或询问gpt。
 
-```sh
-pnpm install
-```
+使用VScode打开项目文件夹，在终端（按ctrl+`快捷键打开）中安装以下内容：
 
-### Compile and Hot-Reload for Development
+​	element plus安装：pnpm install element-plus
 
-```sh
-pnpm dev
-```
+​	echarts安装：pnpm install echarts
 
-### Compile and Minify for Production
+​	less安装：pnpm i -D less
 
-```sh
-pnpm build
-```
+​	sass安装：pnpm install sass
 
-### Lint with [ESLint](https://eslint.org/)
+安装完毕后输入pnpm dev即可运行项目。
 
-```sh
-pnpm lint
-```
