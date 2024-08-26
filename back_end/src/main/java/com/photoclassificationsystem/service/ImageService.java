@@ -14,4 +14,7 @@ public interface ImageService {
 
     //删除图片
     void deleteById(int id);
+
+    //批量导入
+    void handleImagesBatch(MultipartFile[] images) throws IOException;
 }

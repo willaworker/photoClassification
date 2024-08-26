@@ -46,6 +46,14 @@ public class ImageServiceImpl implements ImageService {
         imageMapper.deleteImageById(id);
     }
 
+    //批量导入
+    @Override
+    public void handleImagesBatch(MultipartFile[] images) throws IOException {
+        for (MultipartFile image : images) {
+            handleImage(image); // 复用单个图片处理逻辑
+        }
+    }
+
     private void readFileAttributes(MultipartFile file,ImageInfo imageInfo) {
 
         // 文件名称

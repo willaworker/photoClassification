@@ -22,6 +22,15 @@ public class ImageController {
         return Result.success();
     }
 
+    //批量导入图片
+    @PostMapping("/addBatch")
+    public Result addImagesBatch(MultipartFile[] images) throws IOException {
+        imageService.handleImagesBatch(images);
+        return Result.success();
+    }
+
+
+
     //删除图片
     @DeleteMapping("/delete")
     public Result deleteImage(@RequestParam int id) {
