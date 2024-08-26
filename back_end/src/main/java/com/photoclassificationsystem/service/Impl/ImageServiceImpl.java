@@ -18,11 +18,15 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @Service
 public class ImageServiceImpl implements ImageService {
+
+    private static final DateTimeFormatter EXIF_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
     @Autowired
     private ImageMapper imageMapper;
 
@@ -73,13 +77,14 @@ public class ImageServiceImpl implements ImageService {
             // 读取EXIF子目录信息
             ExifSubIFDDirectory exifDirectory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
             if (exifDirectory != null) {
-                Date date = exifDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
-                System. out.println("时间："+date);
-                imageInfo.setPhotoTime(date);
+                String exifDateStr = exifDirectory.getString(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
+                LocalDateTime photoTime = LocalDateTime.parse(exifDateStr, EXIF_DATE_FORMAT);
+                imageInfo.setPhotoTime(photoTime);
+                System.out.println(imageInfo.getPhotoTime());
             }
             else{
                 Date date = new Date();
-                imageInfo.setPhotoTime(date);
+                imageInfo.setPhotoTime(null);
             }
 
             // 读取GPS信息（未实现）

@@ -11,7 +11,7 @@ public class ImageInfo {
     private int id;
     private String url;
     private String name;
-    private Date photoTime;
+    private LocalDateTime photoTime;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime uploadTime;
