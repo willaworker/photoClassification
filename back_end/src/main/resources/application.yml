@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/photoclassification
+    username: root
+    password: czm15876741410
+
+  servlet:
+    multipart:
+      max-file-size: 10MB  # 单个文件的最大上传大小
+      max-request-size: 10MB  # 总的最大请求大小
+
+
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true #开启驼峰命名和下划线命名替换
