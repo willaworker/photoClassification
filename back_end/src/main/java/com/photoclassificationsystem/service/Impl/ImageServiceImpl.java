@@ -27,8 +27,12 @@ import java.util.Date;
 public class ImageServiceImpl implements ImageService {
 
     private static final DateTimeFormatter EXIF_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
+
     @Autowired
     private ImageMapper imageMapper;
+
+    // 引入FileStorageImpl
+    private final FileStorageImpl fileStorage = new FileStorageImpl();
 
     //上传文件
     @Override
@@ -37,8 +41,11 @@ public class ImageServiceImpl implements ImageService {
         readFileAttributes(image,imageInfo);
 
         //转存至本地路径（后续将路径设为变量方便自定义）
-        String image_URL = "F:\\360MoveData\\Users\\Acer\\Desktop\\test\\" + imageInfo.getName();
-        image.transferTo(new File(image_URL));
+        // String image_URL = "F:\\360MoveData\\Users\\Acer\\Desktop\\test\\" + imageInfo.getName();
+        // image.transferTo(new File(image_URL));
+
+        // 使用FileStorageImpl保存文件到本地
+        String image_URL = fileStorage.saveFileToLocal(image,imageInfo);
         imageInfo.setUrl(image_URL);
         //写入数据库
         imageMapper.insertImage(imageInfo);
@@ -70,6 +77,13 @@ public class ImageServiceImpl implements ImageService {
         imageInfo.setName(fileName); //获取文件名
         imageInfo.setSize(FileSizeConvert.convertBytesToMB(size)); //获取文件大小
         imageInfo.setUploadTime(LocalDateTime.now()); //获取上传文件的时间
+        // 获取文件格式（扩展名）
+        if (fileName != null && fileName.contains(".")) {
+            String formatType = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+            imageInfo.setFormatType(formatType);
+        } else {
+            imageInfo.setFormatType("unknown"); // 如果无法提取格式，设置为unknown
+        }
 
         try (InputStream inputStream = file.getInputStream()) {
             Metadata metadata = ImageMetadataReader.readMetadata(inputStream);
