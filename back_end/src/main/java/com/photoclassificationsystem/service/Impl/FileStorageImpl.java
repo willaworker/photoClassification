@@ -14,6 +14,8 @@ import java.util.Scanner;
 import com.photoclassificationsystem.pojo.ImageInfo;
 import org.springframework.web.multipart.MultipartFile;
 
+import static com.photoclassificationsystem.utils.GetUniqueFilename.getUniqueFileName;
+
 public class FileStorageImpl {
 
     private String storageDirectory;
@@ -58,6 +60,9 @@ public class FileStorageImpl {
 
         // 生成保存路径，包含日期子文件夹
         String filePath = storageDirectory + File.separator + dateFolder + File.separator + file.getOriginalFilename();
+
+        // 检查文件是否已存在，并生成不冲突的文件名
+        filePath = getUniqueFileName(filePath);
 
         // 保存文件
         Path path = Paths.get(filePath);
