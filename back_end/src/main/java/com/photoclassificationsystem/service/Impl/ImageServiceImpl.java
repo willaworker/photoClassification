@@ -40,10 +40,6 @@ public class ImageServiceImpl implements ImageService {
         ImageInfo imageInfo = new ImageInfo();
         readFileAttributes(image,imageInfo);
 
-        //转存至本地路径（后续将路径设为变量方便自定义）
-        // String image_URL = "F:\\360MoveData\\Users\\Acer\\Desktop\\test\\" + imageInfo.getName();
-        // image.transferTo(new File(image_URL));
-
         // 使用FileStorageImpl保存文件到本地
         String image_URL = fileStorage.saveFileToLocal(image,imageInfo);
         imageInfo.setUrl(image_URL);
@@ -54,6 +50,22 @@ public class ImageServiceImpl implements ImageService {
     //删除图片
     @Override
     public void deleteById(int id) {
+        String fileUrl = imageMapper.getUrlById(id);
+        System.out.println("URL: " + fileUrl);
+        // 删除本地文件
+        if (fileUrl != null) {
+            File file = new File(fileUrl);
+            if (file.exists()) {
+                if (file.delete()) {
+                    System.out.println("本地文件删除成功: " + fileUrl);
+                } else {
+                    System.out.println("本地文件删除失败: " + fileUrl);
+                }
+            } else {
+                System.out.println("文件不存在: " + fileUrl);
+            }
+        }
+        // 删除数据库对应数据
         imageMapper.deleteImageById(id);
     }
 

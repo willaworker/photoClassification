@@ -10,6 +10,9 @@ public interface ImageMapper {
     @Select("SELECT * FROM Images WHERE id = #{id}")
     ImageInfo getImageById(int id);
 
+    @Select("SELECT url FROM Images WHERE id = #{id}")
+    String getUrlById(int id);
+
     //上传图片
     @Insert("INSERT INTO Images(url, name, photo_time, upload_time, size, formatType, place, device, category) " +
             "VALUES(#{url}, #{name}, #{photoTime}, #{uploadTime}, #{size}, #{formatType}, #{place}, #{device}, #{category})")
