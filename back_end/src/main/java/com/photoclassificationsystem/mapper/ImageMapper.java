@@ -11,7 +11,8 @@ public interface ImageMapper {
     ImageInfo getImageById(int id);
 
     //上传图片
-    @Insert("INSERT INTO Images(url, name, photo_time, upload_time,size, place, device) VALUES(#{url}, #{name}, #{photoTime}, #{uploadTime},#{size}, #{place}, #{device})")
+    @Insert("INSERT INTO Images(url, name, photo_time, upload_time, size, formatType, place, device, category) " +
+            "VALUES(#{url}, #{name}, #{photoTime}, #{uploadTime}, #{size}, #{formatType}, #{place}, #{device}, #{category})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insertImage(ImageInfo imageInfo);
 

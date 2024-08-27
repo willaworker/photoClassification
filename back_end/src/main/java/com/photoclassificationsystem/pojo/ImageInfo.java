@@ -18,4 +18,6 @@ public class ImageInfo {
     private String size;
     private String place;
     private String device;
+    private String formatType;
+    private String category;
 }
