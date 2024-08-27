@@ -15,22 +15,23 @@ public class GetUniqueFilename {
             return filePath;
         }
 
-        String newFilePath = filePath;
+        String extension = "";  // 文件扩展名
+        String baseName = filePath;  // 文件名基础部分，不包括扩展名
+
+        int dotIndex = filePath.lastIndexOf(".");
+        if (dotIndex != -1) {
+            extension = filePath.substring(dotIndex);
+            baseName = filePath.substring(0, dotIndex);
+        }
+
         int count = 1;
+        String newFilePath = baseName + "(" + count + ")" + extension;
+        file = new File(newFilePath);
+
         while (file.exists()) {
-            String extension = "";  // 文件扩展名
-            String baseName = newFilePath;  // 文件名基础部分，不包括扩展名
-
-            int dotIndex = newFilePath.lastIndexOf(".");
-            if (dotIndex != -1) {
-                extension = newFilePath.substring(dotIndex);
-                baseName = newFilePath.substring(0, dotIndex);
-            }
-
-            // 增加(1), (2) 等后缀
+            count++;
             newFilePath = baseName + "(" + count + ")" + extension;
             file = new File(newFilePath);
-            count++;
         }
 
         return newFilePath;
