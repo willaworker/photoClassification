@@ -1,7 +1,7 @@
 <script setup>
-import { ref ,onMounted,onBeforeUnmount,computed,watch} from 'vue'
+import { ref ,onMounted,onBeforeUnmount,computed,watch,nextTick} from 'vue'
 import axios from 'axios';
-import EXIF from 'exif-js';
+// import EXIF from 'exif-js';
 import userPic1 from '@/assets/img/userPic1.jpg'
 import userPic2 from '@/assets/img/userPic2.jpeg'
 import userPic3 from '@/assets/img/userPic3.jpg'
@@ -15,86 +15,127 @@ import userPic10 from '@/assets/img/userPic10.jpg'
 
 //页签栏
 const active=ref(0)
+const moreList=ref([])
 
 //搜索
 const value2 = ref('')
-watch(value2, (newValue) => {
-  if (newValue !== "") {
-    isNotSort.value = false;
-  }else{
-    if(value1.value==='导入顺序')isNotSort.value = true;
-  }
-});
 
 //下拉菜单
 const value1 = ref('导入顺序')
-const isNotSort=ref(true)
+const isNotSort=ref(false)
 
-// const filteredFileList=ref([])
+const sortList=(sortType)=>{
+  if(sortType!==value1){
+    if(sortType==='导入顺序'){
+      value1.value='导入顺序'
+    }else if(sortType==='时间顺序'){
+      value1.value='时间顺序'
+    }else if(sortType==='大小顺序'){
+      value1.value='大小顺序'
+    }else if(sortType==='文件名顺序'){
+      value1.value='文件名顺序'
+    }
+  }
+}
 
 const fileList = ref([
   {
     objectUrl: userPic1,
     status: 'uploading',
     message: '上传中...',
+    uploadDate:1635475483259,
     file:{name:'八重.jpg',lastModified: 1635475483259,size:1000000,type:'image/jpeg',sort:['八重','狐狸','好看','原神','启动']}
   },
   {
     objectUrl: userPic2,
     status: 'failed',
     message: '上传失败',
+    uploadDate:1635475483259,
     file:{name:'胡桃.jpeg',lastModified: 1709452800000,size:2000000,type:'image/jpeg',sort:['胡桃','堂主','可爱','原神','启动']}
   },
   {
     objectUrl: userPic4,
     status: 'done',
     message: '上传成功',
+    uploadDate:1635475483259,
     file:{name:'77.jpg',lastModified: 1672527600000,size:3000000,type:'image/jpeg',sort:['77','僵尸','海报','原神','启动']}
   },
 ]);
 
 const sortFileList = () => {
-  if (value1.value === '导入顺序') {
-    if(!value2.value)return fileList.value;
-    else  return [...fileList.value].filter(file => file.file.name.includes(value2.value))
-  } else if (value1.value === '时间顺序') {
-    if(!value2.value)return [...fileList.value].sort((a, b) => b.file.lastModified - a.file.lastModified);
-    else return [...fileList.value].sort((a, b) => b.file.lastModified - a.file.lastModified).filter(file => file.file.name.includes(value2.value))
-  } else if (value1.value === '大小顺序') {
-    if(!value2.value)return [...fileList.value].sort((a, b) => b.file.size - a.file.size);
-    else return [...fileList.value].sort((a, b) => b.file.size - a.file.size).filter(file => file.file.name.includes(value2.value))
-  } else if (value1.value === '文件名顺序') {
-    if(!value2.value)return [...fileList.value].sort((a, b) => a.file.name.localeCompare(b.file.name));
-    else return [...fileList.value].sort((a, b) => a.file.name.localeCompare(b.file.name)).filter(file => file.file.name.includes(value2.value))
-  }
-};
+  let sortedList = [...fileList.value];
 
-const sortList=(sortType)=>{
-  if(sortType!==value1){
-    console.log(sortType)
-    if(sortType==='导入顺序'){
-      value1.value='导入顺序'
-      isNotSort.value=true
-    }else if(sortType==='时间顺序'){
-      value1.value='时间顺序'
-      isNotSort.value=false
-    }else if(sortType==='大小顺序'){
-      value1.value='大小顺序'
-      isNotSort.value=false
-    }else if(sortType==='文件名顺序'){
-      value1.value='文件名顺序'
-      isNotSort.value=false
-    }
+  if (value1.value === '导入顺序') {
+      sortedList = sortedList.sort((a, b) => a.uploadTime - b.uploadTime);
+  } else if (value1.value === '时间顺序') {
+      sortedList = sortedList.sort((a, b) => b.file.lastModified - a.file.lastModified);
+  } else if (value1.value === '大小顺序') {
+      sortedList = sortedList.sort((a, b) => b.file.size - a.file.size);
+  } else if (value1.value === '文件名顺序') {
+      sortedList = sortedList.sort((a, b) => a.file.name.localeCompare(b.file.name));
   }
-}
+
+  if (value2.value) {
+      sortedList = sortedList.filter(file => file.file.name.includes(value2.value));
+  }
+
+  return sortedList;
+};
 
 const filteredFileList = computed(() => sortFileList());
 
-const handleAfterRead = (files) => {
-  const formData = new FormData();
+const handleAfterRead = async (files) => {
   if (!Array.isArray(files)) {
     files = [files];
   }
+
+  // 声明 uploadPromises 数组，用于存储每个文件上传的 Promise
+  const uploadPromises = [];
+
+for (const file of files) {
+  const index = fileList.value.findIndex(item => item.objectUrl === file.objectUrl);
+  if (index !== -1) {
+    const selectedFile = fileList.value[index];
+    selectedFile.status = 'uploading';
+    selectedFile.message = '分类中';
+  }
+
+  const formData = new FormData();
+  formData.append('image', file.file);
+
+  // 创建上传的 Promise，并添加到 uploadPromises 数组中
+  const uploadPromise = axios.post('http://localhost:5000/predict', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  }).then(async response => {  // 注意这里的 async
+    console.log('Response Data:', response.data);
+    const predictions = response.data;
+
+    const index = fileList.value.findIndex(item => item.objectUrl === file.objectUrl);
+    if (index !== -1) {
+      const selectedFile = fileList.value[index];
+      selectedFile.status = 'done';
+      selectedFile.uploadTime = Date.now();
+      selectedFile.file.sort = predictions.map(pred => pred.label);
+
+      // 使用 nextTick 确保 UI 更新
+      await nextTick();
+    }
+  }).catch(error => {
+    console.error('Upload failed:', error.response ? error.response.data : error.message);
+    const index = fileList.value.findIndex(item => item.objectUrl === file.objectUrl);
+    if (index !== -1) {
+      const selectedFile = fileList.value[index];
+      selectedFile.status = 'failed';
+      selectedFile.message = '分类失败';
+    }
+  });
+
+  // 将每个上传 Promise 推入 uploadPromises 数组
+  uploadPromises.push(uploadPromise);
+}
+   const formData = new FormData();
   console.log(files.length)
   if (files.length === 1) {
     // 上传单个文件
@@ -149,11 +190,11 @@ const readFile = (file) => {
 };
 
 const readFile2=(item2)=>{
-  pictureName.value=item2.name?item2.name:'未知'
-  picture.value=item2.url?item2.url:'未知'
-  pictureSize.value=item2.size?toSize(item2.size):'未知'
-  pictureTime.value=item2.time?formatTimestamp(item2.time):'未知'
-  pictureSort.value=item2.sort?item2.sort:[]
+    pictureName.value=item2.name?item2.name:'未知'
+    picture.value=item2.objectUrl?item2.objectUrl:'未知'
+    pictureSize.value=item2.size?toSize(item2.size):'未知'
+    pictureTime.value=item2.lastModified?formatTimestamp(item2.lastModified):'未知'
+    pictureSort.value=item2.sort?item2.sort:[]
 }
 
 const toSize=(size)=>{
@@ -172,56 +213,39 @@ const formatTimestamp = (timestamp) => {
   return `${year}/${month}/${day}`;
 };
 
-/*
-//文件夹
-const list=ref([
-  {listName:'20240821',pictureList:[{url:userPic1,name:'name',size:1000000,time:1635475483259,sort:['八重','狐狸','好看','原神','启动']},
-      {url:userPic2,name:'name2',size:2000000,time:1709452800000,sort:['胡桃','堂主','可爱','原神','启动']},
-      {url:userPic3,name:'name3',size:3000000,time:1672527600000,sort:['胡桃','海报','原神','启动']},
-      {url:userPic1,name:'name',size:'200MB',time:'2024/08/21',sort:['八重','狐狸','好看','原神','启动']},
-      {url:userPic2,name:'name2',size:'300MB',time:'2024/08/22',sort:['胡桃','堂主','可爱','原神','启动']},
-      {url:userPic3,name:'name3',size:'400MB',time:'2024/08/23',sort:['胡桃','海报','原神','启动']},
-      {url:userPic1,name:'name',size:'200MB',time:'2024/08/21',sort:['八重','狐狸','好看','原神','启动']},
-      {url:userPic2,name:'name2',size:'300MB',time:'2024/08/22',sort:['胡桃','堂主','可爱','原神','启动']},
-      {url:userPic3,name:'name3',size:'400MB',time:'2024/08/23',sort:['胡桃','海报','原神','启动']},
-      {url:userPic1,name:'name',size:'200MB',time:'2024/08/21',sort:['八重','狐狸','好看','原神','启动']},
-      {url:userPic2,name:'name2',size:'300MB',time:'2024/08/22',sort:['胡桃','堂主','可爱','原神','启动']},
-      {url:userPic3,name:'name3',size:'400MB',time:'2024/08/23',sort:['胡桃','海报','原神','启动']}]},
-  {listName:'20240822',pictureList:[{url:userPic1,name:'name',size:1000000,time:1635475483259,sort:['八重','狐狸','好看','原神','启动']},
-      {url:userPic2,name:'name2',size:2000000,time:1709452800000,sort:['胡桃','堂主','可爱','原神','启动']},
-      {url:userPic3,name:'name3',size:3000000,time:1672527600000,sort:['胡桃','海报','原神','启动']}]},
-  {listName:'20240823',pictureList:[{url:userPic1,name:'name',size:1000000,time:1635475483259,sort:['八重','狐狸','好看','原神','启动']},
-      {url:userPic2,name:'name2',size:2000000,time:1709452800000,sort:['胡桃','堂主','可爱','原神','启动']},
-      {url:userPic3,name:'name3',size:3000000,time:1672527600000,sort:['胡桃','海报','原神','启动']}]}
-])
-*/
+ //文件夹
+ const list=ref([
+    {listName:'20240821',pictureList:[{objectUrl:userPic1,name:'name',size:1000000,lastModified:1635475483259,sort:['八重','狐狸','好看','原神','启动']},{objectUrl:userPic2,name:'name2',size:2000000,lastModified:1709452800000,sort:['胡桃','堂主','可爱','原神','启动']},{objectUrl:userPic3,name:'name3',size:3000000,lastModified:1672527600000,sort:['胡桃','海报','原神','启动']}]},
+    {listName:'20240822',pictureList:[{objectUrl:userPic1,name:'name',size:1000000,lastModified:1635475483259,sort:['八重','狐狸','好看','原神','启动']},{objectUrl:userPic2,name:'name2',size:2000000,lastModified:1709452800000,sort:['胡桃','堂主','可爱','原神','启动']},{objectUrl:userPic3,name:'name3',size:3000000,lastModified:1672527600000,sort:['胡桃','海报','原神','启动']}]},
+    {listName:'20240823',pictureList:[{objectUrl:userPic1,name:'name',size:1000000,lastModified:1635475483259,sort:['八重','狐狸','好看','原神','启动']},{objectUrl:userPic2,name:'name2',size:2000000,lastModified:1709452800000,sort:['胡桃','堂主','可爱','原神','启动']},{objectUrl:userPic3,name:'name3',size:3000000,lastModified:1672527600000,sort:['胡桃','海报','原神','启动']}]}
+  ])
 
-const list = ref([]);
-// 获取文件夹数据
-const fetchFolderData = () => {
-  axios.get('http://localhost:8080/images/folderData')
-      .then(response => {
-        list.value = response.data.map(folder => {
-          return {
-            listName: folder.folderName,
-            pictureList: folder.files.map(file => ({
-              url: `http://localhost:8080/${folder.folderName}/${file.name}`,
-              name: file.name,
-              time: file.formattedPhotoTime, // 格式化后的拍摄时间, 格式为 yyyy/MM/dd 的String
-              size: parseInt(file.size, 10), // 将 file.size 从字符串转换为整数
-              place: file.place, // 拍摄地点 String
-              device: file.device, // 拍摄设备 String
-              formatType: file.formatType, // 文件格式 String
-              category: file.category, // 图片分类 String, 也就是sort
-              sort: ['八重', '狐狸', '好看', '原神', '启动'] // 固定的标签, 未更改
-            }))
-          };
-        });
-      })
-      .catch(error => {
-        console.error('获取文件夹数据失败:', error);
-      });
-};
+// const list = ref([]);
+// // 获取文件夹数据
+// const fetchFolderData = () => {
+//   axios.get('http://localhost:8080/images/folderData')
+//       .then(response => {
+//         list.value = response.data.map(folder => {
+//           return {
+//             listName: folder.folderName,
+//             pictureList: folder.files.map(file => ({
+//               url: `http://localhost:8080/${folder.folderName}/${file.name}`,
+//               name: file.name,
+//               time: file.formattedPhotoTime, // 格式化后的拍摄时间, 格式为 yyyy/MM/dd 的String
+//               size: parseInt(file.size, 10), // 将 file.size 从字符串转换为整数
+//               place: file.place, // 拍摄地点 String
+//               device: file.device, // 拍摄设备 String
+//               formatType: file.formatType, // 文件格式 String
+//               category: file.category, // 图片分类 String, 也就是sort
+//               sort: ['八重', '狐狸', '好看', '原神', '启动'] // 固定的标签, 未更改
+//             }))
+//           };
+//         });
+//       })
+//       .catch(error => {
+//         console.error('获取文件夹数据失败:', error);
+//       });
+// };
 
 const scrollContainers = ref([]);
 const isAtStart = ref([0]);
@@ -264,6 +288,51 @@ onBeforeUnmount(() => {
   });
 });
 
+//查看更多
+const more=async(item)=>{
+    moreList.value.push({
+      listName:item.listName,
+      fileList:item.pictureList.map(picture => ({
+        objectUrl: picture.objectUrl,
+        file: {
+          name: picture.name,
+          size: picture.size,
+          lastModified: picture.lastModified,
+          type: picture.type?picture.type:'image/jpeg',
+          sort: picture.sort
+        }
+      }))
+    })
+    await nextTick()
+    active.value=moreList.value.length+1
+  }
+
+const deleteTabs = (index) => {
+  if (index+2 === active.value) {
+    // 如果删除的是当前选项卡，调整 active 的值
+    active.value = index > 0 ? index + 1 : 1;
+  }
+
+  moreList.value.splice(index, 1);
+
+  // 确保 active 的值在有效范围内
+  if (active.value >= moreList.value.length+1) {
+    active.value = moreList.value.length + 1;
+  }
+};
+
+const readFile3 = (file) => {
+    try {
+      pictureName.value = file.file?.name || '未知';
+      pictureSize.value = file.file?.size ? toSize(file.file.size) : '未知';
+      pictureTime.value = file.file?.lastModified ? formatTimestamp(file.file.lastModified) : '未知';
+      pictureSort.value = file.file?.sort || [];
+      picture.value = file.objectUrl || userPic1;
+    } catch (error) {
+      console.error('Error handling file click:', error);
+    }
+  };
+
 //图片详情
 const picture=ref(userPic1)
 const pictureName=ref('图片名')
@@ -281,7 +350,7 @@ const pictureSort=ref(['八重','狐狸','好看','原神','启动'])
           <van-divider v-for="index in 4" :hairline="false" :style="{ color: '#1989fa', borderColor: '#1989fa', margin: '-0.5px',padding: '0 0 0 16.5px' } " />
         </div>
         <van-tab title="照片导入" class="input">
-          <van-search v-model="value2" placeholder="请输入搜索关键词" background="rgba(0,0,0,0)"  class="search"/>
+          <van-search v-model="value2" placeholder="请输入搜索关键词" background="rgba(0,0,0,0)"  class="search" :clearable="false" />
           <el-dropdown placement="bottom" class="bottom-start" size="large" v-model="value1">
             <el-button  class="listButton">{{value1}}</el-button>
             <template #dropdown>
@@ -295,7 +364,7 @@ const pictureSort=ref(['八重','狐狸','好看','原神','启动'])
             </template>
           </el-dropdown>
           <div class="box"></div>
-          <van-uploader v-show="!isNotSort" v-model="filteredFileList" :after-read="handleAfterRead" preview-size="10.5vw" :preview-full-image="false" multiple @click-preview="readFile">
+          <van-uploader v-show="!isNotSort" v-model="filteredFileList" :after-read="handleAfterRead" preview-size="10.5vw" :preview-full-image="false" multiple @click-preview="readFile" @delete="handleAfterDelete">
             <template #preview-cover="{ file }">
               <div class="preview-cover van-ellipsis" >{{ file.name||'未命名图片' }}</div>
             </template>
@@ -311,30 +380,50 @@ const pictureSort=ref(['八重','狐狸','好看','原神','启动'])
           <div class="cell" v-for="(item,index) in list" :key="item.listName" :style="{userSelect:'none'}">
             <div class="box2">
               <div class="className">{{item.listName}}</div>
-              <button class="more" @click="()=>{
-                  console.log('more')
-                }">查看更多</button>
+              <button class="more" @click="more(item)">查看更多</button>
             </div>
             <div calss="box3"></div>
             <button class="arrowButton" v-show="isAtStart[index]" @click="()=>scrollLeft(index)"><van-icon name="arrow-left" size="30px"/></button>
             <div class="arrowButton2" v-show="!isAtStart[index]"></div>
             <div class="pictureList" :ref="el => scrollContainers[index] = el" @scroll="() => handleScroll(index)">
-              <van-image v-for="(item2) in item.pictureList" :key="item.listName" class="picture" width="150px" :src=item2.url @dragstart="($event)=>{$event.preventDefault();}" @click="readFile2(item2)"/>
+              <van-image v-for="(item2) in item.pictureList" :key="item.listName" class="picture" width="150px" :src=item2.objectUrl @dragstart="($event)=>{$event.preventDefault();}" @click="readFile2(item2)"/>
             </div>
             <button class="arrowButton" v-show="!isAtEnd[index]"  @click="()=>scrollRight(index)"><van-icon name="arrow" size="30px"/></button>
             <div class="arrowButton2" v-show="isAtEnd[index]"></div>
           </div>
+        </van-tab>
+        <van-tab v-for="(item,index) in moreList" class="input">
+          <template #title>{{ item.listName }}<button class="closeButton" @click="deleteTabs(index)"><van-icon name="close" /></button></template>
+          <van-search v-model="value2" placeholder="请输入搜索关键词" background="rgba(0,0,0,0)"  class="search"/>
+          <el-dropdown placement="bottom" class="bottom-start" size="large" v-model="value1">
+            <el-button  class="listButton">{{value1}}</el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item class="listButton" @click="sortList('导入顺序')">导入顺序</el-dropdown-item>
+                <el-dropdown-item class="listButton" @click="sortList('时间顺序')">时间顺序</el-dropdown-item>
+                <el-dropdown-item class="listButton" @click="sortList('大小顺序')">大小顺序</el-dropdown-item>
+                <el-dropdown-item class="listButton" @click="sortList('文件名顺序')">文件名顺序</el-dropdown-item>
+                <el-dropdown-item class="listButton" @click="sortList('其他顺序')" disabled>其他顺序</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <div class="box"></div>
+          <van-uploader v-model="item.fileList" preview-size="10.5vw" :preview-full-image="false" @click-preview="readFile3">
+            <template #preview-cover="{ file }">
+              <div class="preview-cover2 van-ellipsis" >{{ file.name||'未命名图片' }}</div>
+            </template>
+            <div></div>
+          </van-uploader>
         </van-tab>
       </van-tabs>
     </div>
   </div>
   <div class="nav">
     <van-image
-        @dragstart="($event)=>{$event.preventDefault();}"
-        style="min-width: 138px;"
-        width="17.1vw"
-        :src=picture
-    />
+      @dragstart="($event)=>{$event.preventDefault();}"
+      style="min-width: 138px; max-height: 50vh;width: 17.1vw;object-fit: contain;overflow: hidden;"
+      :src=picture
+      />
     <div class="littleTitle">{{pictureName}}</div>
     <div class="littleSize">大小：{{pictureSize}}</div>
     <div class="littleSize">创建时间：{{pictureTime}}</div>
@@ -480,6 +569,25 @@ const pictureSort=ref(['八重','狐狸','好看','原神','启动'])
   height: 160px;
   margin-top: -5px;
   width: 3vw;
+}
+.preview-cover2 {
+  position: absolute;
+  bottom: 0;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 4px;
+  color: #fff;
+  font-size: 12px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+.closeButton{
+  border: none;
+  background-color: rgba(0,0,0,0);
+  cursor: pointer;
+  &:hover{
+    color: rgba(0, 0, 0, 0.8);
+  }
 }
 .nav{
   // align-items: center; /* 水平居中对齐 */
