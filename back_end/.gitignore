@@ -35,3 +35,6 @@ build/
 ### database ###
 /database/*
 !/database/.gitkeep
+
+### config.properties ###
+/src/resources/config.properties
