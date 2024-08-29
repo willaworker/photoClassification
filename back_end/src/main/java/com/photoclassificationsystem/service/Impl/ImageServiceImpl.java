@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -44,8 +45,17 @@ public class ImageServiceImpl implements ImageService {
         // System.out.println("sort"+sort);
         // 使用FileStorageImpl保存文件到本地
         String image_URL = fileStorage.saveFileToLocal(image,imageInfo);
-        imageInfo.setUrl(image_URL);
-        //写入数据库
+
+        File file = new File(image_URL);
+        URI fileUri = file.toURI();
+        String url = fileUri.toString(); // 将路径转换为URL格式
+        if (url.startsWith("file:/")) {
+            url = url.substring(6); // 从索引 6 开始截取字符串
+        }
+        url = url.replace("/", "\\");
+        System.out.println("数据库里的URL: " + url);
+        imageInfo.setUrl(url);
+        // 写入数据库
         imageMapper.insertImage(imageInfo);
     }
 

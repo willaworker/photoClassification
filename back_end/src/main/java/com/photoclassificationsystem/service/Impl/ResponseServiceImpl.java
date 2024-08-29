@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
@@ -39,13 +41,21 @@ public class ResponseServiceImpl implements ResponseService {
                                 if (fileUrl.startsWith("file:///")) {
                                     fileUrl = fileUrl.substring(8); // 从索引 8 开始截取字符串
                                 }
+                                ImageInfo imageInfo = new ImageInfo();
+
+                                String[] pathParts = fileUrl.split("/");
+                                String fileName = pathParts[pathParts.length - 1];
+                                // 设置文件名到imageInfo
+                                imageInfo.setNameOfUrl(fileName);
+
                                 // 将所有的 / 替换为 \
                                 fileUrl = fileUrl.replace("/", "\\");
                                 System.out.println(fileUrl);
-                                ImageInfo imageInfo = new ImageInfo();
+
                                 imageInfo.setUrl(fileUrl);
 
                                 int imageId = imageMapper.getIdByUrl(fileUrl);
+                                // 提取文件名部分
 
                                 imageInfo.setName(imageMapper.getNameById(imageId));
                                 imageInfo.setSize(imageMapper.getSizeById(imageId));
