@@ -290,7 +290,7 @@ const fetchFolderData = () => {
           return {
             listName: folder.folderName,
             pictureList: folder.files.map(file => ({
-              objectUrl: `http://localhost:8080/${folder.folderName}/${file.name}`,
+              objectUrl: `http://localhost:8080/${folder.folderName}/${file.nameOfUrl}`,
               name: file.name,
               lastModified: file.formattedPhotoTime, // 格式化后的拍摄时间, 格式为 yyyy/MM/dd
               size: parseInt(file.size, 10), // 将 file.size 从字符串转换为整数
