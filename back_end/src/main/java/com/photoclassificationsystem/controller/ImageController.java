@@ -24,27 +24,35 @@ public class ImageController {
     private ImageService imageService;
     @Autowired
     private ResponseService responseService;
-    @Value("${storageDirectory}")
-    private String storageDirectory;
 
     //导入图片
     @PostMapping("/add")
-    public Result addImage(MultipartFile image) throws IOException {
-        imageService.handleImage(image);
+    public Result addImage(@RequestParam("image") MultipartFile image,
+                           @RequestParam("sort") String sort) throws IOException {
+        imageService.handleImage(image, sort);
         return Result.success();
     }
 
+
     //批量导入图片
     @PostMapping("/addBatch")
-    public Result addImagesBatch(MultipartFile[] images) throws IOException {
-        imageService.handleImagesBatch(images);
+    public Result addImagesBatch(@RequestParam("images") MultipartFile[] images,
+                                 @RequestParam("sort") List<String> sorts) throws IOException {
+        imageService.handleImagesBatch(images, sorts);
         return Result.success();
     }
+
 
     //删除图片
     @DeleteMapping("/delete")
     public Result deleteImage(@RequestParam int id) {
         imageService.deleteById(id);
+        return Result.success();
+    }
+
+    @DeleteMapping("/deleteByUrl")
+    public Result deleteImageByUrl(@RequestParam String Url) {
+        imageService.deleteByUrl(Url);
         return Result.success();
     }
 

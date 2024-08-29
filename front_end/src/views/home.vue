@@ -121,7 +121,6 @@ for (const file of files) {
       selectedFile.status = 'done';
       selectedFile.uploadTime = Date.now();
       selectedFile.file.sort = predictions.map(pred => pred.label);
-
       // 使用 nextTick 确保 UI 更新
       await nextTick();
     }
@@ -138,11 +137,14 @@ for (const file of files) {
   // 将每个上传 Promise 推入 uploadPromises 数组
   uploadPromises.push(uploadPromise);
 }
-   const formData = new FormData();
+  // 等待所有上传和处理完成
+  await Promise.all(uploadPromises);
+  const formData = new FormData();
   console.log(files.length)
   if (files.length === 1) {
     // 上传单个文件
     formData.append('image', files[0].file);
+    formData.append('sort', JSON.stringify(files[0].file.sort)); // 添加 sort 信息
     axios.post('http://localhost:8080/images/add', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -157,8 +159,9 @@ for (const file of files) {
         });
   } else {
     // 上传多个文件
-    files.forEach(file => {
+    files.forEach((file) => {
       formData.append('images', file.file);
+      formData.append('sort', JSON.stringify(file.file.sort)); // 添加 sort 信息
     });
     axios.post('http://localhost:8080/images/addBatch', formData, {
       headers: {
@@ -175,10 +178,22 @@ for (const file of files) {
   }
 };
 
-//文件删除操作
+//文件删除操作, 还未完成, 需要前端为每个图片对象设置id, 需要后端返回id值
 const handleAfterDelete = (file) => {
-  console.log('文件已删除:', file);
+  const imageId = file.file.id;
+  axios.delete('http://localhost:8080/delete', {
+    params: {
+      id: imageId,
+    },
+  })
+      .then(response => {
+        console.log('文件删除成功:', response.data);
+      })
+      .catch(error => {
+        console.error('文件删除失败:', error.response ? error.response.data : error.message);
+      });
 };
+
 
 //首页图片内容读取
 const readFile = (file) => {
@@ -211,8 +226,12 @@ const toSize=(size)=>{
   return parseFloat((size / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-//事件格式转化
+//时间格式转化
 const formatTimestamp = (timestamp) => {
+  // 如果是 yyyy/MM/dd 的字符串则直接返回
+  if (typeof timestamp === 'string' && /^\d{4}\/\d{2}\/\d{2}$/.test(timestamp)) {
+    return timestamp;
+  }
   const date = new Date(timestamp);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从 0 开始
@@ -220,39 +239,38 @@ const formatTimestamp = (timestamp) => {
   return `${year}/${month}/${day}`;
 };
 
- //文件夹
- const list=ref([
-    {listName:'20240821',pictureList:[{objectUrl:userPic1,name:'name',size:1000000,lastModified:1635475483259,sort:['八重','狐狸','好看','原神','启动']},{objectUrl:userPic2,name:'name2',size:2000000,lastModified:1709452800000,sort:['胡桃','堂主','可爱','原神','启动']},{objectUrl:userPic3,name:'name3',size:3000000,lastModified:1672527600000,sort:['胡桃','海报','原神','启动']}]},
-    {listName:'20240822',pictureList:[{objectUrl:userPic1,name:'name',size:1000000,lastModified:1635475483259,sort:['八重','狐狸','好看','原神','启动']},{objectUrl:userPic2,name:'name2',size:2000000,lastModified:1709452800000,sort:['胡桃','堂主','可爱','原神','启动']},{objectUrl:userPic3,name:'name3',size:3000000,lastModified:1672527600000,sort:['胡桃','海报','原神','启动']}]},
-    {listName:'20240823',pictureList:[{objectUrl:userPic1,name:'name',size:1000000,lastModified:1635475483259,sort:['八重','狐狸','好看','原神','启动']},{objectUrl:userPic2,name:'name2',size:2000000,lastModified:1709452800000,sort:['胡桃','堂主','可爱','原神','启动']},{objectUrl:userPic3,name:'name3',size:3000000,lastModified:1672527600000,sort:['胡桃','海报','原神','启动']}]}
-  ])
+ // //文件夹
+ // const list=ref([
+ //    {listName:'20240821',pictureList:[{objectUrl:userPic1,name:'name',size:1000000,lastModified:1635475483259,sort:['八重','狐狸','好看','原神','启动']},{objectUrl:userPic2,name:'name2',size:2000000,lastModified:1709452800000,sort:['胡桃','堂主','可爱','原神','启动']},{objectUrl:userPic3,name:'name3',size:3000000,lastModified:1672527600000,sort:['胡桃','海报','原神','启动']}]},
+ //    {listName:'20240822',pictureList:[{objectUrl:userPic1,name:'name',size:1000000,lastModified:1635475483259,sort:['八重','狐狸','好看','原神','启动']},{objectUrl:userPic2,name:'name2',size:2000000,lastModified:1709452800000,sort:['胡桃','堂主','可爱','原神','启动']},{objectUrl:userPic3,name:'name3',size:3000000,lastModified:1672527600000,sort:['胡桃','海报','原神','启动']}]},
+ //    {listName:'20240823',pictureList:[{objectUrl:userPic1,name:'name',size:1000000,lastModified:1635475483259,sort:['八重','狐狸','好看','原神','启动']},{objectUrl:userPic2,name:'name2',size:2000000,lastModified:1709452800000,sort:['胡桃','堂主','可爱','原神','启动']},{objectUrl:userPic3,name:'name3',size:3000000,lastModified:1672527600000,sort:['胡桃','海报','原神','启动']}]}
+ //  ])
 
-// const list = ref([]);
-// // 获取文件夹数据
-// const fetchFolderData = () => {
-//   axios.get('http://localhost:8080/images/folderData')
-//       .then(response => {
-//         list.value = response.data.map(folder => {
-//           return {
-//             listName: folder.folderName,
-//             pictureList: folder.files.map(file => ({
-//               url: `http://localhost:8080/${folder.folderName}/${file.name}`,
-//               name: file.name,
-//               time: file.formattedPhotoTime, // 格式化后的拍摄时间, 格式为 yyyy/MM/dd 的String
-//               size: parseInt(file.size, 10), // 将 file.size 从字符串转换为整数
-//               place: file.place, // 拍摄地点 String
-//               device: file.device, // 拍摄设备 String
-//               formatType: file.formatType, // 文件格式 String
-//               category: file.category, // 图片分类 String, 也就是sort
-//               sort: ['八重', '狐狸', '好看', '原神', '启动'] // 固定的标签, 未更改
-//             }))
-//           };
-//         });
-//       })
-//       .catch(error => {
-//         console.error('获取文件夹数据失败:', error);
-//       });
-// };
+const list = ref([]);
+// 获取文件夹数据
+const fetchFolderData = () => {
+  axios.get('http://localhost:8080/images/folderData')
+      .then(response => {
+        list.value = response.data.map(folder => {
+          return {
+            listName: folder.folderName,
+            pictureList: folder.files.map(file => ({
+              objectUrl: `http://localhost:8080/${folder.folderName}/${file.name}`,
+              name: file.name,
+              lastModified: file.formattedPhotoTime, // 格式化后的拍摄时间, 格式为 yyyy/MM/dd
+              size: parseInt(file.size, 10), // 将 file.size 从字符串转换为整数
+              place: file.place, // 拍摄地点 String
+              device: file.device, // 拍摄设备 String
+              formatType: file.formatType, // 文件格式 String
+              sort: JSON.parse(file.category), // 图片分类 String, 也就是sort
+            }))
+          };
+        });
+      })
+      .catch(error => {
+        console.error('获取文件夹数据失败:', error);
+      });
+};
 
 const scrollContainers = ref([]);
 const isAtStart = ref([0]);
