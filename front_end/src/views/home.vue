@@ -106,6 +106,7 @@ const handleAfterRead = (files) => {
     })
         .then(response => {
           console.log('文件上传成功', response.data);
+          fetchFolderData();
         })
         .catch(error => {
           console.error('文件上传失败', error);
@@ -122,6 +123,7 @@ const handleAfterRead = (files) => {
     })
         .then(response => {
           console.log('文件批量上传成功', response.data);
+          fetchFolderData();
         })
         .catch(error => {
           console.error('文件批量上传失败', error);
@@ -221,13 +223,6 @@ const fetchFolderData = () => {
       });
 };
 
-const handleCategoryPreviewClick = () => {
-  console.log("handleCategoryPreviewClick 被触发");
-  fetchFolderData();
-  console.log("数据获取已调用");
-}
-
-
 const scrollContainers = ref([]);
 const isAtStart = ref([0]);
 const isAtEnd = ref([]);
@@ -313,7 +308,6 @@ const pictureSort=ref(['八重','狐狸','好看','原神','启动'])
           </van-uploader>
         </van-tab>
         <van-tab title="分类预览" class="preview">
-          <button @click="handleCategoryPreviewClick">点击预览</button>
           <div class="cell" v-for="(item,index) in list" :key="item.listName" :style="{userSelect:'none'}">
             <div class="box2">
               <div class="className">{{item.listName}}</div>
