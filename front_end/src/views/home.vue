@@ -23,7 +23,6 @@ const value2 = ref('')
 //下拉菜单
 const value1 = ref('导入顺序')
 const isNotSort=ref(false)
-
 const sortList=(sortType)=>{
   if(sortType!==value1){
     if(sortType==='导入顺序'){
@@ -38,6 +37,7 @@ const sortList=(sortType)=>{
   }
 }
 
+//真正的文件夹
 const fileList = ref([
   {
     objectUrl: userPic1,
@@ -62,6 +62,7 @@ const fileList = ref([
   },
 ]);
 
+//搜索和排序操作
 const sortFileList = () => {
   let sortedList = [...fileList.value];
 
@@ -82,8 +83,10 @@ const sortFileList = () => {
   return sortedList;
 };
 
+//这是显示的预览文件夹，真正的文件夹被隐藏
 const filteredFileList = computed(() => sortFileList());
 
+//文件上传
 const handleAfterRead = async (files) => {
   if (!Array.isArray(files)) {
     files = [files];
@@ -172,11 +175,12 @@ for (const file of files) {
   }
 };
 
+//文件删除操作
 const handleAfterDelete = (file) => {
   console.log('文件已删除:', file);
 };
 
-
+//首页图片内容读取
 const readFile = (file) => {
   const index = fileList.value.findIndex((item) => item.objectUrl === file.objectUrl);
   if (index !== -1) {
@@ -189,6 +193,7 @@ const readFile = (file) => {
   }
 };
 
+//分类预览界面图片内容读取
 const readFile2=(item2)=>{
     pictureName.value=item2.name?item2.name:'未知'
     picture.value=item2.objectUrl?item2.objectUrl:'未知'
@@ -197,6 +202,7 @@ const readFile2=(item2)=>{
     pictureSort.value=item2.sort?item2.sort:[]
 }
 
+//大小格式转化
 const toSize=(size)=>{
   if (size === 0) pictureSize.value='0 B';
   const k = 1024;
@@ -205,6 +211,7 @@ const toSize=(size)=>{
   return parseFloat((size / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
+//事件格式转化
 const formatTimestamp = (timestamp) => {
   const date = new Date(timestamp);
   const year = date.getFullYear();
@@ -269,7 +276,6 @@ const  handleScroll=(index)=>{
 
 // 添加滚动事件监听
 onMounted(() => {
-
   scrollContainers.value.forEach((container, index) => {
     if (container) {
       container.addEventListener('scroll', () => handleScroll(index));
@@ -307,6 +313,7 @@ const more=async(item)=>{
     active.value=moreList.value.length+1
   }
 
+//删除页签
 const deleteTabs = (index) => {
   if (index+2 === active.value) {
     // 如果删除的是当前选项卡，调整 active 的值
@@ -321,6 +328,7 @@ const deleteTabs = (index) => {
   }
 };
 
+//新增页签图片内容读取
 const readFile3 = (file) => {
     try {
       pictureName.value = file.file?.name || '未知';
@@ -331,7 +339,7 @@ const readFile3 = (file) => {
     } catch (error) {
       console.error('Error handling file click:', error);
     }
-  };
+};
 
 //图片详情
 const picture=ref(userPic1)
