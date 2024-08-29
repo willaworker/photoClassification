@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class ImageServiceImpl implements ImageService {
@@ -36,10 +37,11 @@ public class ImageServiceImpl implements ImageService {
 
     //上传文件
     @Override
-    public void handleImage(MultipartFile image) throws IOException {
+    public void handleImage(MultipartFile image, String sort) throws IOException {
         ImageInfo imageInfo = new ImageInfo();
         readFileAttributes(image,imageInfo);
-
+        imageInfo.setCategory(sort);
+        // System.out.println("sort"+sort);
         // 使用FileStorageImpl保存文件到本地
         String image_URL = fileStorage.saveFileToLocal(image,imageInfo);
         imageInfo.setUrl(image_URL);
@@ -69,11 +71,17 @@ public class ImageServiceImpl implements ImageService {
         imageMapper.deleteImageById(id);
     }
 
+    @Override
+    public void deleteByUrl(String Url) {
+
+    }
+
     //批量导入
     @Override
-    public void handleImagesBatch(MultipartFile[] images) throws IOException {
-        for (MultipartFile image : images) {
-            handleImage(image); // 复用单个图片处理逻辑
+    public void handleImagesBatch(MultipartFile[] images, List<String> sorts) throws IOException {
+        for (int i = 0; i < images.length; i++) {
+            String sort = sorts.get(i);
+            handleImage(images[i], sort);
         }
     }
 
