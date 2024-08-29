@@ -58,7 +58,7 @@ const fileList = ref([
     objectUrl: userPic1,
     status: 'uploading',
     message: '上传中...',
-    uploadDate:1635475483259,
+    uploadTime:1635475483259,
     place:'北京',
     device:'红米k40',
     file:{name:'八重.jpg',lastModified: 1635475483259,size:1000000,type:'image/jpeg',sort:['八重','狐狸','好看','原神','启动']}
@@ -67,7 +67,7 @@ const fileList = ref([
     objectUrl: userPic2,
     status: 'failed',
     message: '上传失败',
-    uploadDate:1635475483259,
+    uploadTime:1672527600000,
     place:'上海',
     device:'华为',
     file:{name:'胡桃.jpeg',lastModified: 1709452800000,size:2000000,type:'image/jpeg',sort:['胡桃','堂主','可爱','原神','启动']}
@@ -76,7 +76,7 @@ const fileList = ref([
     objectUrl: userPic4,
     status: 'done',
     message: '上传成功',
-    uploadDate:1635475483259,
+    uploadTime:1709452800000,
     place:'武汉',
     device:'锤子',
     file:{name:'77.jpg',lastModified: 1672527600000,size:3000000,type:'image/jpeg',sort:['77','僵尸','海报','原神','启动']}
@@ -206,7 +206,12 @@ for (const file of files) {
 
 //文件删除操作, 还未完成, 需要前端为每个图片对象设置id, 需要后端返回id值
 const handleAfterDelete = (file) => {
-  const imageId = file.file.id;
+  console.log(file)
+  const index = fileList.value.findIndex(item => item.uploadTime === file.uploadTime);
+  if (index !== -1) {
+    fileList.value.splice(index, 1);
+  }
+  const imageId = file.uploadTime;
   axios.delete('http://localhost:8080/delete', {
     params: {
       id: imageId,
