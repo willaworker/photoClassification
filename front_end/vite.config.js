@@ -22,5 +22,13 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+  server: {
+    proxy: {
+      '/ImagesArchivedByDate': {
+        target: 'http://localhost:8080', // 代理到 Spring Boot 静态资源目录
+        changeOrigin: true
+      }
+    }
   }
 })

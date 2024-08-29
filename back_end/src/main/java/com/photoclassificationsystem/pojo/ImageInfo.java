@@ -20,4 +20,5 @@ public class ImageInfo {
     private String device;
     private String formatType;
     private String category;
+    private String formattedPhotoTime; // yyyy/MM/dd
 }

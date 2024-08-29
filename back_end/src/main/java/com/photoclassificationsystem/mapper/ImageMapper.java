@@ -32,5 +32,31 @@ public interface ImageMapper {
     @Select("SELECT * FROM Images WHERE name LIKE CONCAT('%', #{keyword}, '%')")
     List<ImageInfo> searchImages(String keyword);
 
+    @Select("SELECT id FROM Images WHERE url = #{url}")
+    int getIdByUrl(String url);
+
+    @Select("SELECT name FROM Images WHERE id = #{id}")
+    String getNameById(int id);
+
+    @Select("SELECT photo_time FROM Images WHERE id = #{id}")
+    String getPhotoTimeById(int id);
+
+    @Select("SELECT upload_time FROM Images WHERE id = #{id}")
+    String getUploadTimeById(int id);
+
+    @Select("SELECT size FROM Images WHERE id = #{id}")
+    String getSizeById(int id);
+
+    @Select("SELECT place FROM Images WHERE id = #{id}")
+    String getPlaceById(int id);
+
+    @Select("SELECT device FROM Images WHERE id = #{id}")
+    String getDeviceById(int id);
+
+    @Select("SELECT formatType FROM Images WHERE id = #{id}")
+    String getFormatTypeById(int id);
+
+    @Select("SELECT category FROM Images WHERE id = #{id}")
+    String getCategoryById(int id);
 
 }

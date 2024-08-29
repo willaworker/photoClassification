@@ -17,4 +17,5 @@ public interface ImageService {
 
     //批量导入
     void handleImagesBatch(MultipartFile[] images) throws IOException;
+
 }

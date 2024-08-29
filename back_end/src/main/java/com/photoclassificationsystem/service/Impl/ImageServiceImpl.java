@@ -87,7 +87,7 @@ public class ImageServiceImpl implements ImageService {
         long size = file.getSize();
 
         imageInfo.setName(fileName); //获取文件名
-        imageInfo.setSize(FileSizeConvert.convertBytesToMB(size)); //获取文件大小
+        imageInfo.setSize(String.valueOf(size)); //获取文件大小
         imageInfo.setUploadTime(LocalDateTime.now()); //获取上传文件的时间
         // 获取文件格式（扩展名）
         if (fileName != null && fileName.contains(".")) {

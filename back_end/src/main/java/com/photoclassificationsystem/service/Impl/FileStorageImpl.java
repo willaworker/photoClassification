@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
-import java.util.Scanner;
 
 import com.photoclassificationsystem.pojo.ImageInfo;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,31 +25,35 @@ public class FileStorageImpl {
     public FileStorageImpl() {
         // 在构造函数中尝试加载持久化的路径
         storageDirectory = loadDirectoryPath();
+        // 检查路径是否为默认相对路径
+        if ("ImagesArchivedByDate".equals(storageDirectory) || storageDirectory == null || storageDirectory.isEmpty()) {
+            storageDirectory = initializeDefaultDirectory();
+            saveDirectoryPath(storageDirectory); // 保存绝对路径到配置文件
+        }
     }
 
-    // 检查是否已有存储路径
-    private void checkAndSetDirectory() {
-        if (storageDirectory == null || storageDirectory.isEmpty()) {
-            // 如果未设置路径，则提示用户通过命令行输入路径
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("请输入要归档的目标路径: ");
-            String inputPath = scanner.nextLine();
 
-            File selectedDirectory = new File(inputPath);
+    // 初始化默认存储目录
+    private String initializeDefaultDirectory() {
+        // 当前工作目录
+        String currentWorkingDirectory = System.getProperty("user.dir");
 
-            // 验证用户输入的路径是否有效
-            if (selectedDirectory.exists() && selectedDirectory.isDirectory()) {
-                storageDirectory = selectedDirectory.getAbsolutePath();
-                saveDirectoryPath(storageDirectory); // 保存路径
-            } else {
-                throw new RuntimeException("无效路径");
+        // 创建默认文件夹
+        String defaultDirectory = currentWorkingDirectory + File.separator + "ImagesArchivedByDate";
+        File directory = new File(defaultDirectory);
+
+        if (!directory.exists()) {
+            boolean created = directory.mkdirs();
+            if (!created) {
+                throw new RuntimeException("无法创建目录：" + defaultDirectory);
             }
         }
+
+        return directory.getAbsolutePath();
     }
 
     // 保存文件到本地目录
     public String saveFileToLocal(MultipartFile file, ImageInfo imageInfo) throws IOException {
-        checkAndSetDirectory();
 
         // 根据 photoTime 生成日期子文件夹名称
         String dateFolder = "unknown_date";
@@ -78,7 +81,11 @@ public class FileStorageImpl {
         Properties properties = new Properties();
         properties.setProperty(DIRECTORY_KEY, path);
 
-        try (FileOutputStream outputStream = new FileOutputStream(CONFIG_FILE)) {
+        // 获取 resources 目录路径
+        String resourcesDirectory = new File(System.getProperty("user.dir"), "/back_end/src/main/resources").getAbsolutePath();
+        File configFile = new File(resourcesDirectory, CONFIG_FILE);
+
+        try (FileOutputStream outputStream = new FileOutputStream(configFile)) {
             properties.store(outputStream, "File Storage Configuration");
         } catch (IOException e) {
             e.printStackTrace();
@@ -90,7 +97,11 @@ public class FileStorageImpl {
     private String loadDirectoryPath() {
         Properties properties = new Properties();
 
-        try (FileInputStream inputStream = new FileInputStream(CONFIG_FILE)) {
+        // 获取 resources 目录路径
+        String resourcesDirectory = new File(System.getProperty("user.dir"), "back_end/src/main/resources").getAbsolutePath();
+        File configFile = new File(resourcesDirectory, CONFIG_FILE);
+
+        try (FileInputStream inputStream = new FileInputStream(configFile)) {
             properties.load(inputStream);
             return properties.getProperty(DIRECTORY_KEY);
         } catch (IOException e) {

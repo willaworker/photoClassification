@@ -9,6 +9,11 @@ spring:
   sql:
     init:
       mode: always
+  web:
+    resources:
+      static-locations: file:ImagesArchivedByDate/
+  config:
+    import: "classpath:config.properties"
 
 mybatis:
   configuration:
