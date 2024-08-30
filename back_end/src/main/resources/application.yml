@@ -24,7 +24,7 @@ spring:
     resources:
       static-locations: file:ImagesArchivedByDate/
   config:
-    import: "classpath:config.properties"
+    import: "optional:classpath:config.properties"
 
 mybatis:
   configuration:
