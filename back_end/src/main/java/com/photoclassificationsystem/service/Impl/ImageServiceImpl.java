@@ -146,7 +146,7 @@ public class ImageServiceImpl implements ImageService {
             // 读取拍摄者信息
             ExifIFD0Directory ifd0Directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
             if (ifd0Directory != null) {
-                String artist = ifd0Directory.getString(ExifIFD0Directory.TAG_ARTIST);
+                String artist = ifd0Directory.getString(ExifIFD0Directory.TAG_MAKE);
                 imageInfo.setDevice(artist);
             }
         } catch (Exception e) {

@@ -16,8 +16,8 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 100MB  # 单个文件的最大上传大小
-      max-request-size: 100MB  # 总的最大请求大小
+      max-file-size: 1000MB
+      max-request-size: 1000MB
   sql:
     init:
       mode: always
@@ -30,4 +30,4 @@ spring:
 
 mybatis:
   configuration:
-    map-underscore-to-camel-case: true #开启驼峰命名和下划线命名替换
+    map-underscore-to-camel-case: true
