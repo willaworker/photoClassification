@@ -10,6 +10,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "axios": "^1.7.5",
     "element-plus": "^2.8.0",
     "exif-js": "github:exif-js/exif-js",
     "exifreader": "^4.23.3",

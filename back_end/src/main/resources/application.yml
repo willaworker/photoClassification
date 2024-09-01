@@ -14,7 +14,8 @@ spring:
       static-locations: file:ImagesArchivedByDate/
   config:
     import: "classpath:config.properties"
-
+server:
+  port: 8888
 mybatis:
   configuration:
     map-underscore-to-camel-case: true #开启驼峰命名和下划线命名替换

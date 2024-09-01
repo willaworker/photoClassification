@@ -27,6 +27,7 @@ public class ImageController {
 
     //导入图片
     @PostMapping("/add")
+    @CrossOrigin
     public Result addImage(@RequestParam("image") MultipartFile image,
                            @RequestParam("sort") String sort) throws IOException {
         imageService.handleImage(image, sort);
@@ -36,6 +37,7 @@ public class ImageController {
 
     //批量导入图片
     @PostMapping("/addBatch")
+    @CrossOrigin
     public Result addImagesBatch(@RequestParam("images") MultipartFile[] images,
                                  @RequestParam("sort") List<String> sorts) throws IOException {
         imageService.handleImagesBatch(images, sorts);
@@ -45,12 +47,14 @@ public class ImageController {
 
     //删除图片
     @DeleteMapping("/delete")
+    @CrossOrigin
     public Result deleteImage(@RequestParam int id) {
         imageService.deleteById(id);
         return Result.success();
     }
 
     @DeleteMapping("/deleteByUrl")
+    @CrossOrigin
     public Result deleteImageByUrl(@RequestParam String Url) {
         imageService.deleteByUrl(Url);
         return Result.success();
