@@ -131,6 +131,13 @@ const handleAfterRead = async (files) => {
   }
 
   for (const file of files) {
+    const index = fileList.value.findIndex(item => item.objectUrl === file.objectUrl);
+  if (index !== -1) {
+    const selectedFile = fileList.value[index];
+    selectedFile.status = 'uploading';
+    selectedFile.message = '上传中';
+  }
+
     const formData = new FormData();
     formData.append('image', file.file);
 
@@ -184,7 +191,8 @@ for (const file of files) {
     }
   }).then(async response => {  // 注意这里的 async
     console.log('Response Data:', response.data);
-    const predictions = response.data;
+    const predictions = response.data.predictions;
+    const metadata =response.data.metadata;
 
     const index = fileList.value.findIndex(item => item.objectUrl === file.objectUrl);
     if (index !== -1) {
@@ -192,6 +200,8 @@ for (const file of files) {
       selectedFile.status = 'done';
       selectedFile.uploadTime = Date.now();
       selectedFile.file.sort = predictions.map(pred => pred.label);
+      selectedFile.device=metadata.device
+      selectedFile.place=metadata.location
       // 使用 nextTick 确保 UI 更新
       await nextTick();
     }
