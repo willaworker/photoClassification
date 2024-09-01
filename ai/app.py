@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from PIL import Image
 import torch
@@ -70,6 +70,26 @@ def classify_image():
         filtered_predictions.sort(key=lambda x: x['score'], reverse=True)
 
         return jsonify(filtered_predictions)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/image', methods=['POST'])
+def get_image():
+    try:
+        if 'image' not in request.files:
+            return jsonify({"error": "No file part"}), 400
+
+        file = request.files['image']
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400
+
+        img = load_image(file)
+
+        img_bytes = io.BytesIO()
+        img.save(img_bytes, format='JPEG')
+        img_bytes.seek(0)
+        return send_file(img_bytes, mimetype='image/jpeg')
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
