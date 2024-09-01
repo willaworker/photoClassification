@@ -22,4 +22,5 @@ public class ImageInfo {
     private String category;
     private String formattedPhotoTime; // yyyy/MM/dd
     private String nameOfUrl;
+    private String uploadTimeVue;
 }

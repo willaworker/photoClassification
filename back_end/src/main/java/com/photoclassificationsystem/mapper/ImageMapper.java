@@ -14,14 +14,17 @@ public interface ImageMapper {
     String getUrlById(int id);
 
     //上传图片
-    @Insert("INSERT INTO Images(url, name, photo_time, upload_time, size, formatType, place, device, category) " +
-            "VALUES(#{url}, #{name}, #{photoTime}, #{uploadTime}, #{size}, #{formatType}, #{place}, #{device}, #{category})")
+    @Insert("INSERT INTO Images(url, name, photo_time, upload_time, size, formatType, place, device, category, uploadTimeVue) " +
+            "VALUES(#{url}, #{name}, #{photoTime}, #{uploadTime}, #{size}, #{formatType}, #{place}, #{device}, #{category}, #{uploadTimeVue})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insertImage(ImageInfo imageInfo);
 
     //删除图片
     @Delete("DELETE FROM Images WHERE id = #{id}")
     void deleteImageById(int id);
+
+    @Delete("DELETE FROM Images WHERE uploadTimeVue = #{uploadTimeVue}")
+    void deleteImageByTimestamp(String uploadTimeVue);
 
     @Delete("DELETE FROM Images WHERE url = #{url}")
     int deleteImageByUrl(String url);
@@ -59,4 +62,6 @@ public interface ImageMapper {
     @Select("SELECT category FROM Images WHERE id = #{id}")
     String getCategoryById(int id);
 
+    @Select("SELECT id FROM Images WHERE uploadTimeVue = #{uploadTimeVue}")
+    int getIdByTimestamp(String uploadTimeVue);
 }
