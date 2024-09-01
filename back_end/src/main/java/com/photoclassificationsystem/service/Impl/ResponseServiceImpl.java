@@ -67,8 +67,10 @@ public class ResponseServiceImpl implements ResponseService {
                                 // 解析并格式化 photoTimeString
                                 String photoTimeString = imageMapper.getPhotoTimeById(imageId);
                                 if (photoTimeString != null) {
-                                    // 使用DateTimeFormatter解析字符串为LocalDateTime
-                                    DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+                                    // 使用DateTimeFormatter解析字符串为LocalDateTime（openGauss数据库使用）
+                                    DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd' 'HH:mm:ss");
+                                    // 使用DateTimeFormatter解析字符串为LocalDateTime（本地数据库使用）
+                                    //DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
                                     LocalDateTime photoTime = LocalDateTime.parse(photoTimeString, inputFormatter);
 
                                     // 格式化为yyyy/MM/dd格式的字符串

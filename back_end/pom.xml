@@ -80,6 +80,13 @@
             <version>3.41.2.2</version>
         </dependency>
 
+        <!-- 引入openGauss驱动依赖 -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.5.0</version>
+        </dependency>
+
         <!-- Apache Commons IO -->
         <dependency>
             <groupId>commons-io</groupId>
