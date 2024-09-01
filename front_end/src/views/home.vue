@@ -112,14 +112,59 @@ const sortFileList = () => {
 //这是显示的预览文件夹，真正的文件夹被隐藏
 const filteredFileList = computed(() => sortFileList());
 
+function createUpdatedFile(oldFile, newType) {
+  // 创建一个新的 Blob 对象，使用新的 MIME 类型
+  const blob = new Blob([oldFile], { type: newType });
+
+  // 创建一个新的 File 对象，保留原有的属性
+  return new File([blob], oldFile.name, {
+    type: newType,
+    lastModified: oldFile.lastModified,
+  });
+}
+
+
 //文件上传
 const handleAfterRead = async (files) => {
   if (!Array.isArray(files)) {
     files = [files];
   }
 
-  // 声明 uploadPromises 数组，用于存储每个文件上传的 Promise
-  const uploadPromises = [];
+  for (const file of files) {
+    const formData = new FormData();
+    formData.append('image', file.file);
+
+    try {
+      // 上传 RAW 文件进行处理
+      const response = await axios.post('http://localhost:5000/image', formData, {
+        responseType: 'blob'
+      });
+
+      const mimeType = file.file.type || 'image/jpeg';
+      const imageUrl = URL.createObjectURL(new Blob([response.data], { type: mimeType }));  
+
+      const index = fileList.value.findIndex(item => item.objectUrl === file.objectUrl);
+      if (index !== -1) {
+        const selectedFile = fileList.value[index];
+        selectedFile.objectUrl = imageUrl;
+        // 创建一个新的 File 对象，更新 MIME 类型
+        selectedFile.file = createUpdatedFile(file.file, mimeType);
+        selectedFile.status = 'done';
+      }
+
+    } catch (error) {
+      console.error('Failed to process file:', error);
+      const index = fileList.value.findIndex(item => item.objectUrl === file.objectUrl);
+      if (index !== -1) {
+        const selectedFile = fileList.value[index];
+        selectedFile.status = 'failed';
+        selectedFile.message = '处理失败';
+      }
+    }
+  }
+
+// 声明 uploadPromises 数组，用于存储每个文件上传的 Promise
+const uploadPromises = [];
 
 for (const file of files) {
   const index = fileList.value.findIndex(item => item.objectUrl === file.objectUrl);
@@ -204,7 +249,7 @@ for (const file of files) {
   }
 };
 
-//文件删除操作, 还未完成, 需要前端为每个图片对象设置id, 需要后端返回id值
+//文件删除操作
 const handleAfterDelete = (file) => {
   console.log(file)
   const index = fileList.value.findIndex(item => item.uploadTime === file.uploadTime);
@@ -219,6 +264,7 @@ const handleAfterDelete = (file) => {
   })
       .then(response => {
         console.log('文件删除成功:', response.data);
+        fetchFolderData();
       })
       .catch(error => {
         console.error('文件删除失败:', error.response ? error.response.data : error.message);
@@ -231,6 +277,7 @@ const readFile = (file) => {
   const index = fileList.value.findIndex((item) => item.objectUrl === file.objectUrl);
   if (index !== -1) {
     const selectedFile = fileList.value[index];
+    console.log(selectedFile)
     pictureName.value=selectedFile.file.name?selectedFile.file.name:'未知'
     pictureSize.value=selectedFile.file.size?toSize(selectedFile.file.size):'未知'
     pictureTime.value=selectedFile.file.lastModified?formatTimestamp(selectedFile.file.lastModified):'未知'
@@ -360,7 +407,8 @@ const more=async(item)=>{
         size: picture.size,
         lastModified: picture.lastModified,
         type: picture.type?picture.type:'image/jpeg',
-        sort: picture.sort
+        sort: picture.sort,
+        uploadTime: picture.uploadTime
       }
     }))
   })
@@ -456,6 +504,7 @@ const pictureSort=ref(['八重','狐狸','好看','原神','启动'])
           <van-uploader v-model="fileList" :after-read="handleAfterRead" preview-size="10.5vw" :preview-full-image="false" multiple @click-preview="readFile" accept="image/*,.cr2,.cr3,.nef,.nrw,.arw,.srf,.sr2,.raf,.orf,.rw2,.pef,.dng,.raw,.srw,.kdc,.erf,.rwl,.mef,.tif,.tiff" :preview-image="false">
             <template #preview-cover="{ file }">
               <div class="preview-cover van-ellipsis" >{{ file.name||'未命名图片' }}</div>
+              <img :src="file.objectUrl" alt="Image preview" class="preview-image"/>
             </template>
           </van-uploader>
         </van-tab>
@@ -491,7 +540,7 @@ const pictureSort=ref(['八重','狐狸','好看','原神','启动'])
             </template>
           </el-dropdown>
           <div class="box"></div>
-          <van-uploader v-model="item.fileList" preview-size="10.5vw" :preview-full-image="false" @click-preview="readFile3">
+          <van-uploader v-model="item.fileList" preview-size="10.5vw" :preview-full-image="false" @click-preview="readFile3" @delete="handleAfterDelete">
             <template #preview-cover="{ file }">
               <div class="preview-cover2 van-ellipsis" >{{ file.name||'未命名图片' }}</div>
             </template>
