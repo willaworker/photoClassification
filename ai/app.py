@@ -6,6 +6,8 @@ import torch.nn.functional as F
 from transformers import AutoFeatureExtractor, SwinForImageClassification
 import rawpy
 import io
+import exifread
+from geopy.geocoders import Nominatim
 
 app = Flask(__name__)
 CORS(app)
@@ -14,6 +16,8 @@ CORS(app)
 feature_extractor = AutoFeatureExtractor.from_pretrained("microsoft/swin-large-patch4-window12-384-in22k")
 model = SwinForImageClassification.from_pretrained("microsoft/swin-large-patch4-window12-384-in22k")
 model = model.eval()
+
+geolocator = Nominatim(user_agent="geoapiExercises")
 
 def load_image(file):
     try:
@@ -30,6 +34,23 @@ def load_image(file):
             raise ValueError(f"Unsupported image format or failed to process RAW file: {str(e)}")
     return img
 
+def get_exif_data(file):
+    file.seek(0)
+    tags = exifread.process_file(file, details=False)
+    return tags
+
+def convert_gps_to_address(lat, lon):
+    try:
+        location = geolocator.reverse((lat, lon), exactly_one=True)
+        return location.address if location else None
+    except Exception as e:
+        return str(e)
+
+def convert_to_degrees(value):
+    d = float(value.values[0].num) / float(value.values[0].den)
+    m = float(value.values[1].num) / float(value.values[1].den)
+    s = float(value.values[2].num) / float(value.values[2].den)
+    return d + (m / 60.0) + (s / 3600.0)
 
 @app.route('/predict', methods=['POST'])
 def classify_image():
@@ -42,6 +63,19 @@ def classify_image():
             return jsonify({"error": "No selected file"}), 400
 
         img = load_image(file)
+
+        # 提取图片的 EXIF 信息
+        exif_data = get_exif_data(file)
+        metadata = {}
+        if 'Image Model' in exif_data:
+            metadata['device'] = str(exif_data['Image Model'])
+        if 'GPS GPSLatitude' in exif_data and 'GPS GPSLongitude' in exif_data:
+            lat = convert_to_degrees(exif_data['GPS GPSLatitude'])
+            lon = convert_to_degrees(exif_data['GPS GPSLongitude'])
+
+            metadata['latitude'] = lat
+            metadata['longitude'] = lon
+            metadata['location'] = convert_gps_to_address(lat, lon)
 
         # 图片预处理并进行预测
         inputs = feature_extractor(images=img, return_tensors="pt")
@@ -69,7 +103,13 @@ def classify_image():
         # 按置信度从高到低排序
         filtered_predictions.sort(key=lambda x: x['score'], reverse=True)
 
-        return jsonify(filtered_predictions)
+        # 返回分类结果和图片的 EXIF 信息
+        response = {
+            "predictions": filtered_predictions,
+            "metadata": metadata
+        }
+
+        return jsonify(response)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
