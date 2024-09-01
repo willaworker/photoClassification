@@ -24,3 +24,4 @@
 
 安装完毕后输入pnpm dev即可运行项目。
 
+测试文件运行：npm run test
