@@ -1,23 +1,23 @@
 spring:
   datasource:
-#   driver-class-name: org.sqlite.JDBC
-#    url: jdbc:sqlite:./back_end/database/photoClassification.db
-     url: jdbc:postgresql://120.46.55.9:26000/postgres
-     username: zrb
-     password: Zrb1314526.
-     driver-class-name: org.postgresql.Driver
-     hikari:
-       maximum-pool-size: 10
-      minimum-idle: 5
-      idle-timeout: 30000
-      pool-name: HikariCP
-       max-lifetime: 600000
-       connection-timeout: 30000
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:./back_end/database/photoClassification.db
+#     url: jdbc:postgresql://120.46.55.9:26000/postgres
+#     username: zrb
+#     password: Zrb1314526.
+#     driver-class-name: org.postgresql.Driver
+#     hikari:
+#       maximum-pool-size: 10
+#      minimum-idle: 5
+#      idle-timeout: 30000
+#      pool-name: HikariCP
+#       max-lifetime: 600000
+#       connection-timeout: 30000
 
   servlet:
     multipart:
-      max-file-size: 100MB  # 单个文件的最大上传大小
-      max-request-size: 100MB  # 总的最大请求大小
+      max-file-size: 1000MB
+      max-request-size: 1000MB
   sql:
     init:
       mode: always
@@ -30,4 +30,4 @@ spring:
 
 mybatis:
   configuration:
-    map-underscore-to-camel-case: true #开启驼峰命名和下划线命名替换
+    map-underscore-to-camel-case: true
