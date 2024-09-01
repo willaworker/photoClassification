@@ -29,8 +29,9 @@ public class ImageController {
     @PostMapping("/add")
     @CrossOrigin
     public Result addImage(@RequestParam("image") MultipartFile image,
-                           @RequestParam("sort") String sort) throws IOException {
-        imageService.handleImage(image, sort);
+                           @RequestParam("sort") String sort,
+                           @RequestParam("uploadTime") String uploadTime) throws IOException {
+        imageService.handleImage(image, sort, uploadTime);
         return Result.success();
     }
 
@@ -39,16 +40,17 @@ public class ImageController {
     @PostMapping("/addBatch")
     @CrossOrigin
     public Result addImagesBatch(@RequestParam("images") MultipartFile[] images,
-                                 @RequestParam("sort") List<String> sorts) throws IOException {
-        imageService.handleImagesBatch(images, sorts);
+                                 @RequestParam("sort") List<String> sorts,
+                                 @RequestParam("uploadTime") List<String> uploadTime) throws IOException {
+        imageService.handleImagesBatch(images, sorts, uploadTime);
         return Result.success();
     }
 
     //删除图片
-    @DeleteMapping("/delete")
-    @CrossOrigin
-    public Result deleteImage(@RequestParam int id) {
-        imageService.deleteById(id);
+    @PostMapping ("/delete")
+    public Result deleteImage(@RequestParam("timestamp") String timestamp) {
+        System.out.println("Received timestamp: " + timestamp);
+        imageService.deleteByTimestamp(timestamp);
         return Result.success();
     }
 

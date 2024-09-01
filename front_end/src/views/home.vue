@@ -166,11 +166,11 @@ for (const file of files) {
   // 等待所有上传和处理完成
   await Promise.all(uploadPromises);
   const formData = new FormData();
-  console.log(files.length)
   if (files.length === 1) {
     // 上传单个文件
     formData.append('image', files[0].file);
     formData.append('sort', JSON.stringify(files[0].file.sort)); // 添加 sort 信息
+    formData.append('uploadTime', JSON.stringify(files[0].uploadTime)); // 添加 uploadTime 信息
     axios.post('http://localhost:8080/images/add', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -188,6 +188,8 @@ for (const file of files) {
     files.forEach((file) => {
       formData.append('images', file.file);
       formData.append('sort', JSON.stringify(file.file.sort)); // 添加 sort 信息
+      formData.append('uploadTime', JSON.stringify(file.uploadTime)); // 添加 uploadTime 信息
+      console.log(file.uploadTime);
     });
     axios.post('http://localhost:8080/images/addBatch', formData, {
       headers: {
@@ -204,21 +206,19 @@ for (const file of files) {
   }
 };
 
-//文件删除操作, 还未完成, 需要前端为每个图片对象设置id, 需要后端返回id值
+//文件删除操作, 使用上传时候的时间戳
 const handleAfterDelete = (file) => {
   console.log(file)
   const index = fileList.value.findIndex(item => item.uploadTime === file.uploadTime);
   if (index !== -1) {
     fileList.value.splice(index, 1);
   }
-  const imageId = file.uploadTime;
-  axios.delete('http://localhost:8080/delete', {
-    params: {
-      id: imageId,
-    },
-  })
+  const formData = new FormData();
+  formData.append('timestamp', file.uploadTime);
+  axios.post('http://localhost:8080/images/delete', formData)
       .then(response => {
         console.log('文件删除成功:', response.data);
+        fetchFolderData();
       })
       .catch(error => {
         console.error('文件删除失败:', error.response ? error.response.data : error.message);

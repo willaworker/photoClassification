@@ -9,7 +9,6 @@ import com.drew.metadata.exif.GpsDirectory;
 import com.photoclassificationsystem.mapper.ImageMapper;
 import com.photoclassificationsystem.pojo.ImageInfo;
 import com.photoclassificationsystem.service.ImageService;
-import com.photoclassificationsystem.utils.FileSizeConvert;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -38,7 +36,7 @@ public class ImageServiceImpl implements ImageService {
 
     //上传文件
     @Override
-    public void handleImage(MultipartFile image, String sort) throws IOException {
+    public void handleImage(MultipartFile image, String sort, String uploadTimeVue) throws IOException {
         ImageInfo imageInfo = new ImageInfo();
         readFileAttributes(image,imageInfo);
         imageInfo.setCategory(sort);
@@ -55,6 +53,7 @@ public class ImageServiceImpl implements ImageService {
         url = url.replace("/", "\\");
         System.out.println("数据库里的URL: " + url);
         imageInfo.setUrl(url);
+        imageInfo.setUploadTimeVue(String.valueOf((uploadTimeVue)));
         // 写入数据库
         imageMapper.insertImage(imageInfo);
     }
@@ -82,16 +81,21 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
+    public void deleteByTimestamp(String timestamp) {
+        int targetId = imageMapper.getIdByTimestamp(timestamp);
+        deleteById(targetId);
+    }
     public void deleteByUrl(String Url) {
 
     }
 
     //批量导入
     @Override
-    public void handleImagesBatch(MultipartFile[] images, List<String> sorts) throws IOException {
+    public void handleImagesBatch(MultipartFile[] images, List<String> sorts, List<String> uploadTime) throws IOException {
         for (int i = 0; i < images.length; i++) {
             String sort = sorts.get(i);
-            handleImage(images[i], sort);
+            String eachUploadTimeVue = uploadTime.get(i);
+            handleImage(images[i], sort, eachUploadTimeVue);
         }
     }
 
