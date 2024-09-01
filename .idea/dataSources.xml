@@ -1,19 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="photoClassification" uuid="8e039618-e5af-45e3-9bc4-c5a1dac6018f">
-      <driver-ref>sqlite.xerial</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:D:\AntiQuark\ZPFLfromGit_2\photo_classification\back_end\database\photoClassification.db</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-      <libraries>
-        <library>
-          <url>file://$PROJECT_DIR$/../../Maven/apache-maven-3.6.3/repository/org/xerial/sqlite-jdbc/3.41.2.2/sqlite-jdbc-3.41.2.2.jar</url>
-        </library>
-      </libraries>
-    </data-source>
-    <data-source source="LOCAL" name="photoClassification [2]" uuid="e647c5ac-b7f1-4cce-815a-4eeff9b5c5ac">
+    <data-source source="LOCAL" name="photoClassification" uuid="e7efb5c0-f400-4582-90a8-122e78fa0830">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
@@ -21,28 +9,15 @@
       <working-dir>$ProjectFileDir$</working-dir>
       <libraries>
         <library>
-          <url>file://$PROJECT_DIR$/../../Maven/apache-maven-3.6.3/repository/org/xerial/sqlite-jdbc/3.41.2.2/sqlite-jdbc-3.41.2.2.jar</url>
+          <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/Xerial SQLiteJDBC/3.45.1/org/xerial/sqlite-jdbc/3.45.1.0/sqlite-jdbc-3.45.1.0.jar</url>
         </library>
-      </libraries>
-    </data-source>
-    <data-source source="LOCAL" name="photoClassification [3]" uuid="db84ce3b-f592-4547-86d6-a02084176160">
-      <driver-ref>sqlite.xerial</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:D:\picture_classify\photo_classiy\photo_classification\back_end\database\photoClassification.db</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-      <libraries>
+        <library>
+          <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/Xerial SQLiteJDBC/3.45.1/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar</url>
+        </library>
         <library>
           <url>file://$PROJECT_DIR$/../../Maven/apache-maven-3.6.3/repository/org/xerial/sqlite-jdbc/3.41.2.2/sqlite-jdbc-3.41.2.2.jar</url>
         </library>
       </libraries>
-    </data-source>
-    <data-source source="LOCAL" name="photoClassification.db" uuid="1d0fd598-cec0-4bcc-86b7-d5c5f052bf82">
-      <driver-ref>sqlite.xerial</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/back_end/database/photoClassification.db</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>
 </project>

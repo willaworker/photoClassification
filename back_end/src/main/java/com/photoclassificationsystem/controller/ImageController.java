@@ -44,7 +44,6 @@ public class ImageController {
         return Result.success();
     }
 
-
     //删除图片
     @DeleteMapping("/delete")
     @CrossOrigin
