@@ -61,6 +61,8 @@ public interface ImageMapper {
 
     @Select("SELECT category FROM Images WHERE id = #{id}")
     String getCategoryById(int id);
+    @Select("SELECT uploadTimeVue FROM Images WHERE id = #{id}")
+    String getUploadTimeVueById(int id);
 
     @Select("SELECT id FROM Images WHERE uploadTimeVue = #{uploadTimeVue}")
     int getIdByTimestamp(String uploadTimeVue);

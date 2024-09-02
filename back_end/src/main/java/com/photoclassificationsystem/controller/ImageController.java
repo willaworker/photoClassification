@@ -7,12 +7,14 @@ import com.photoclassificationsystem.service.ImageService;
 import com.photoclassificationsystem.service.ResponseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 
@@ -30,8 +32,10 @@ public class ImageController {
     @CrossOrigin
     public Result addImage(@RequestParam("image") MultipartFile image,
                            @RequestParam("sort") String sort,
-                           @RequestParam("uploadTime") String uploadTime) throws IOException {
-        imageService.handleImage(image, sort, uploadTime);
+                           @RequestParam("uploadTime") String uploadTime,
+                           @RequestParam("device") String device,
+                           @RequestParam("place") String place) throws IOException {
+        imageService.handleImage(image, sort, uploadTime, device ,place);
         return Result.success();
     }
 
@@ -41,14 +45,16 @@ public class ImageController {
     @CrossOrigin
     public Result addImagesBatch(@RequestParam("images") MultipartFile[] images,
                                  @RequestParam("sort") List<String> sorts,
-                                 @RequestParam("uploadTime") List<String> uploadTime) throws IOException {
-        imageService.handleImagesBatch(images, sorts, uploadTime);
+                                 @RequestParam("uploadTime") List<String> uploadTime,
+                                 @RequestParam("device") List<String> device,
+                                 @RequestParam("place") List<String> place) throws IOException {
+        imageService.handleImagesBatch(images, sorts, uploadTime, device, place);
         return Result.success();
     }
 
     //删除图片
     @PostMapping ("/delete")
-    public Result deleteImage(@RequestParam("timestamp") String timestamp) {
+    public Result deleteImage(@RequestParam("timestamp") String timestamp) throws UnsupportedEncodingException {
         System.out.println("Received timestamp: " + timestamp);
         imageService.deleteByTimestamp(timestamp);
         return Result.success();
@@ -74,5 +80,12 @@ public class ImageController {
             e.printStackTrace();
             throw new RuntimeException("获取文件夹数据时出错: " + e.getMessage());
         }
+    }
+
+    @PostMapping("/processRaw")
+    @CrossOrigin
+    public String processRaw(@RequestParam("folderName") String folderName,
+                                        @RequestParam("fileNameOfUrl") String fileNameOfUrl) throws IOException {
+        return imageService.processRawFile(folderName, fileNameOfUrl);
     }
 }

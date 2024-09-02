@@ -148,14 +148,14 @@ const handleAfterRead = async (files) => {
       });
 
       const mimeType = file.file.type || 'image/jpeg';
-      const imageUrl = URL.createObjectURL(new Blob([response.data], { type: mimeType }));  
+      const imageUrl = URL.createObjectURL(new Blob([response.data], { type: mimeType }));
 
       const index = fileList.value.findIndex(item => item.objectUrl === file.objectUrl);
       if (index !== -1) {
         const selectedFile = fileList.value[index];
         selectedFile.objectUrl = imageUrl;
         // 创建一个新的 File 对象，更新 MIME 类型
-        selectedFile.file = createUpdatedFile(file.file, mimeType);
+        // selectedFile.file = createUpdatedFile(file.file, mimeType);
         selectedFile.status = 'done';
       }
 
@@ -226,6 +226,8 @@ for (const file of files) {
     formData.append('image', files[0].file);
     formData.append('sort', JSON.stringify(files[0].file.sort)); // 添加 sort 信息
     formData.append('uploadTime', JSON.stringify(files[0].uploadTime)); // 添加 uploadTime 信息
+    formData.append('device', JSON.stringify(files[0].device)); // 添加 uploadTime 信息
+    formData.append('place', JSON.stringify(files[0].place)); // 添加 uploadTime 信息
     axios.post('http://localhost:8080/images/add', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -244,6 +246,8 @@ for (const file of files) {
       formData.append('images', file.file);
       formData.append('sort', JSON.stringify(file.file.sort)); // 添加 sort 信息
       formData.append('uploadTime', JSON.stringify(file.uploadTime)); // 添加 uploadTime 信息
+      formData.append('device', JSON.stringify(file.device)); // 添加 uploadTime 信息
+      formData.append('place', JSON.stringify(file.place)); // 添加 uploadTime 信息
       console.log(file.uploadTime);
     });
     axios.post('http://localhost:8080/images/addBatch', formData, {
@@ -341,12 +345,31 @@ const list = ref([]);
 // 获取文件夹数据
 const fetchFolderData = () => {
   axios.get('http://localhost:8080/images/folderData')
-      .then(response => {
-        list.value = response.data.map(folder => {
-          return {
-            listName: folder.folderName,
-            pictureList: folder.files.map(file => ({
-              objectUrl: `http://localhost:8080/${folder.folderName}/${file.nameOfUrl}`,
+      .then(async response => {
+        list.value = await Promise.all(response.data.map(async folder => {
+          // 使用 await Promise.all 等待所有异步操作完成后再返回最终结果
+          const pictureList = await Promise.all(folder.files.map(async file => {
+            let objectUrl = `http://localhost:8080/${folder.folderName}/${file.nameOfUrl}`;
+            const extension = file.name.split('.').pop().toLowerCase();
+
+            // 检查文件扩展名是否为 dng 或 raw
+            if (extension === 'dng' || extension === 'raw') {
+              try {
+                const formData = new FormData();
+                formData.append('folderName', folder.folderName);
+                formData.append('fileNameOfUrl', file.nameOfUrl);
+
+                const rawResponse = await axios.post('http://localhost:8080/images/processRaw', formData);
+
+                // 使用返回的 URL 作为 objectUrl
+                objectUrl = rawResponse.data;
+              } catch (error) {
+                console.error('Failed to process RAW/DNG file:', error);
+              }
+            }
+
+            return {
+              objectUrl: objectUrl,
               name: file.name,
               lastModified: file.formattedPhotoTime, // 格式化后的拍摄时间, 格式为 yyyy/MM/dd
               size: parseInt(file.size, 10), // 将 file.size 从字符串转换为整数
@@ -354,9 +377,49 @@ const fetchFolderData = () => {
               device: file.device, // 拍摄设备 String
               formatType: file.formatType, // 文件格式 String
               sort: JSON.parse(file.category), // 图片分类 String, 也就是sort
-            }))
+            };
+          }));
+
+          return {
+            listName: folder.folderName,
+            pictureList: pictureList
           };
-        });
+        }));
+
+
+        fileList.value = await Promise.all(response.data.flatMap(folder =>
+            folder.files.map(async file => {
+              const extension = file.name.split('.').pop().toLowerCase();
+              let objectUrl = `http://localhost:8080/${folder.folderName}/${file.nameOfUrl}`;
+              if (extension === 'dng' || extension === 'raw') {
+                try {
+                  const formData = new FormData();
+                  formData.append('folderName', folder.folderName);
+                  formData.append('fileNameOfUrl', file.nameOfUrl);
+                  const rawResponse = await axios.post('http://localhost:8080/images/processRaw', formData);
+                  objectUrl = rawResponse.data;
+                  console.log(objectUrl);
+                } catch (error) {
+                  console.error('Failed to process RAW/DNG file:', error);
+                }
+              }
+              return {
+                objectUrl: objectUrl,
+                status: 'done',
+                message: '上传成功',
+                uploadTime: file.uploadTimeVue,
+                place: file.place,
+                device: file.device,
+                file: {
+                  name: file.name,
+                  lastModified: file.formattedPhotoTime,
+                  size: parseInt(file.size, 10),
+                  type: 'image/jpeg',
+                  sort: JSON.parse(file.category),
+                }
+              };
+            })
+        ));
       })
       .catch(error => {
         console.error('获取文件夹数据失败:', error);
@@ -393,6 +456,9 @@ onMounted(() => {
     }
   });
 });
+
+onMounted(()=>{fetchFolderData()}
+)
 
 // 移除滚动事件监听
 onBeforeUnmount(() => {
@@ -535,19 +601,6 @@ const pictureSort=ref(['八重','狐狸','好看','原神','启动'])
         </van-tab>
         <van-tab v-for="(item,index) in moreList" class="input">
           <template #title>{{ item.listName }}<button class="closeButton" @click="deleteTabs(index)"><van-icon name="close" /></button></template>
-          <van-search v-model="value2" placeholder="请输入搜索关键词" background="rgba(0,0,0,0)"  class="search"/>
-          <el-dropdown placement="bottom" class="bottom-start" size="large" v-model="value1">
-            <el-button  class="listButton">{{value1}}</el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item class="listButton" @click="sortList('导入顺序')">导入顺序</el-dropdown-item>
-                <el-dropdown-item class="listButton" @click="sortList('时间顺序')">时间顺序</el-dropdown-item>
-                <el-dropdown-item class="listButton" @click="sortList('大小顺序')">大小顺序</el-dropdown-item>
-                <el-dropdown-item class="listButton" @click="sortList('文件名顺序')">文件名顺序</el-dropdown-item>
-                <el-dropdown-item class="listButton" @click="sortList('其他顺序')" disabled>其他顺序</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
           <div class="box"></div>
           <van-uploader v-model="item.fileList" preview-size="10.5vw" :preview-full-image="false" @click-preview="readFile3" @delete="handleAfterDelete">
             <template #preview-cover="{ file }">
@@ -569,7 +622,7 @@ const pictureSort=ref(['八重','狐狸','好看','原神','启动'])
     <div class="littleSize">大小：{{pictureSize}}</div>
     <div class="littleSize" v-show="picturePlace">拍摄地点：{{picturePlace}}</div>
     <div class="littleSize" v-show="pictureDevice">拍摄设备：{{pictureDevice}}</div>
-    <div class="littleSize">创建时间：{{pictureTime}}</div>
+    <div class="littleSize">拍摄时间：{{pictureTime}}</div>
     <div class="classficiation">
       <div class="tag" v-for="(item,index) in pictureSort" :key="index"><van-tag  round size="large" color="rgb(204, 204, 204)" text-color="black" type="primary">{{ item }}</van-tag></div>
     </div>

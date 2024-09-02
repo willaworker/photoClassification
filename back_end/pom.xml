@@ -100,6 +100,19 @@
             <version>2.18.0</version>
         </dependency>
 
+        <!-- 图片处理相关依赖 -->
+        <dependency>
+            <groupId>com.twelvemonkeys.imageio</groupId>
+            <artifactId>imageio-jpeg</artifactId>
+            <version>3.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.twelvemonkeys.imageio</groupId>
+            <artifactId>imageio-tiff</artifactId>
+            <version>3.6</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>

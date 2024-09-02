@@ -17,7 +17,7 @@ feature_extractor = AutoFeatureExtractor.from_pretrained("microsoft/swin-large-p
 model = SwinForImageClassification.from_pretrained("microsoft/swin-large-patch4-window12-384-in22k")
 model = model.eval()
 
-geolocator = Nominatim(user_agent="geoapiExercises")
+geolocator = Nominatim(user_agent="photo1364561561")
 
 def load_image(file):
     try:

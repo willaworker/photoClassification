@@ -31,6 +31,10 @@ public class ResponseServiceImpl implements ResponseService {
             Files.walkFileTree(Paths.get(folderPath), new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    // 忽略名称为 "raw" 的文件夹和根目录
+                    if (dir.getFileName().toString().equalsIgnoreCase("raw")) {
+                        return FileVisitResult.SKIP_SUBTREE; // 跳过该目录及其子目录的遍历
+                    }
                     if (!dir.equals(Paths.get(folderPath))) { // 忽略根目录
                         FolderInfo folderInfo = new FolderInfo(dir.getFileName().toString(), new ArrayList<>());
 
@@ -44,9 +48,9 @@ public class ResponseServiceImpl implements ResponseService {
                                 ImageInfo imageInfo = new ImageInfo();
 
                                 String[] pathParts = fileUrl.split("/");
-                                String fileName = pathParts[pathParts.length - 1];
+                                String fileNameOfUrl = pathParts[pathParts.length - 1];
                                 // 设置文件名到imageInfo
-                                imageInfo.setNameOfUrl(fileName);
+                                imageInfo.setNameOfUrl(fileNameOfUrl);
 
                                 // 将所有的 / 替换为 \
                                 fileUrl = fileUrl.replace("/", "\\");
@@ -81,6 +85,7 @@ public class ResponseServiceImpl implements ResponseService {
                                 // 设置 photoTime 和 uploadTime 为 null
                                 imageInfo.setPhotoTime(null);
                                 imageInfo.setUploadTime(null);
+                                imageInfo.setUploadTimeVue(imageMapper.getUploadTimeVueById(imageId));
 
                                 folderInfo.getFiles().add(imageInfo);
 
