@@ -15,7 +15,7 @@ public interface ImageService {
     void deleteById(int id) throws UnsupportedEncodingException;
     void deleteByTimestamp(String Timestamp) throws UnsupportedEncodingException;
 
-    void deleteByUrl(String Url);
+    void deleteByUrl(String Url) throws UnsupportedEncodingException;
 
     //批量导入
     void handleImagesBatch(MultipartFile[] images, List<String> sorts, List<String> uploadTime, List<String> device, List<String> place) throws IOException;

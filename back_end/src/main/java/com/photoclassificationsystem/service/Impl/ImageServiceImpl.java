@@ -133,8 +133,9 @@ public class ImageServiceImpl implements ImageService {
         int targetId = imageMapper.getIdByTimestamp(timestamp);
         deleteById(targetId);
     }
-    public void deleteByUrl(String Url) {
-
+    public void deleteByUrl(String Url) throws UnsupportedEncodingException {
+        int targetId = imageMapper.getIdByUrl(Url);
+        deleteById(targetId);
     }
 
     //批量导入

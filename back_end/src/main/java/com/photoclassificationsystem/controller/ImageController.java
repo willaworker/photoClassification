@@ -62,7 +62,7 @@ public class ImageController {
 
     @DeleteMapping("/deleteByUrl")
     @CrossOrigin
-    public Result deleteImageByUrl(@RequestParam String Url) {
+    public Result deleteImageByUrl(@RequestParam String Url) throws UnsupportedEncodingException {
         imageService.deleteByUrl(Url);
         return Result.success();
     }
