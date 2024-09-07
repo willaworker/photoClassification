@@ -331,6 +331,30 @@ const handleAfterRead = async (files) => {
   }
 };
 
+//一键删除功能
+const deleteAll =()=>{
+  isDelete.value=true
+  const formData = new FormData();
+  formData.append("timestamp", file.uploadTime);
+  axios
+    .post("http://localhost:8080/images/delete", formData)
+    .then((response) => {
+      fileList.value=[]
+      isDelete.value=false
+      console.log("文件删除成功:", response.data);
+    })
+    .catch((error) => {
+      isDelete.value=false
+      console.error(
+        "文件删除失败:",
+        error.response ? error.response.data : error.message
+      );
+    });
+}
+
+const isDelete=ref(false)
+
+
 //文件删除操作, 使用上传时候的时间戳
 const handleAfterDelete = (file) => {
   console.log(file);
@@ -781,6 +805,7 @@ const pictureSort = ref(["标签"]);
               />
             </template>
           </van-uploader>
+          <div class="box3"><van-button type="primary" :loading="isDelete" loading-text="删除中..."  class="deleteAll" @click="deleteAll">一键删除</van-button></div>
         </van-tab>
         <van-tab title="分类预览" class="preview">
           <div
@@ -959,7 +984,12 @@ const pictureSort = ref(["标签"]);
         }
       }
     }
-    .preview {
+    .box3 .deleteAll{
+      top: -60px;
+      right: 1vw;
+      position: absolute;
+    }
+.preview {
       display: inline-block;
       padding-left: 1vw;
     }
