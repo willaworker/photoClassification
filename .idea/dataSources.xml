@@ -2,7 +2,7 @@
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
     <data-source source="LOCAL" name="photoClassification" uuid="f90b052e-e5fc-49b2-a3c4-9b652f8388c5">
-      <driver-ref>sqlite.xerial</driver-ref>
+      <driver-ref>dfcef2df-f44b-47da-b8f7-c83e1add80eb</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:D:\AntiQuark\ZPFLfromGit_2\photo_classification\back_end\database\photoClassification.db</jdbc-url>
