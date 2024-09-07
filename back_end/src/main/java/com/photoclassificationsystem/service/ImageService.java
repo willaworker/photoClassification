@@ -21,4 +21,7 @@ public interface ImageService {
     void handleImagesBatch(MultipartFile[] images, List<String> sorts, List<String> uploadTime, List<String> device, List<String> place) throws IOException;
 
     String processRawFile(String folderName, String fileNameOfUrl) throws IOException;
+
+    //一键删除全部
+    void deleteAll();
 }

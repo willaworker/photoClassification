@@ -6,6 +6,7 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.exif.GpsDirectory;
+import com.photoclassificationsystem.PhotoClassificationSystemApplication;
 import com.photoclassificationsystem.mapper.ImageMapper;
 import com.photoclassificationsystem.pojo.ImageInfo;
 import com.photoclassificationsystem.service.ImageService;
@@ -36,6 +37,9 @@ public class ImageServiceImpl implements ImageService {
 
     @Autowired
     private ImageMapper imageMapper;
+
+    @Autowired
+    private StorageCleanupServiceImpl storageCleanupServiceImpl;
 
     // 引入FileStorageImpl
     private final FileStorageImpl fileStorage = new FileStorageImpl();
@@ -193,6 +197,13 @@ public class ImageServiceImpl implements ImageService {
             // 返回生成的图像 URL
             return "http://localhost:8080/raw/" + fileName;
         }
+    }
+
+    //一键删除全部照片
+    @Override
+    public void deleteAll() {
+        storageCleanupServiceImpl.deleteStorageDirectoryContents();
+        imageMapper.deleteImageAll();
     }
 
     private void readFileAttributes(MultipartFile file,ImageInfo imageInfo) {

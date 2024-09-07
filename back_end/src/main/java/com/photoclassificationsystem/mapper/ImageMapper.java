@@ -66,4 +66,7 @@ public interface ImageMapper {
 
     @Select("SELECT id FROM Images WHERE uploadTimeVue = #{uploadTimeVue}")
     int getIdByTimestamp(String uploadTimeVue);
+
+    @Delete("DELETE FROM Images")
+    void deleteImageAll();
 }

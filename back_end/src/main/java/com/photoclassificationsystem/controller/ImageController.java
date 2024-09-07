@@ -67,6 +67,13 @@ public class ImageController {
         return Result.success();
     }
 
+    //实现一键删除
+    @DeleteMapping("/deleteAll")
+    public Result deleteAllImages(@RequestParam("trigger") int trigger) {
+        imageService.deleteAll();
+        return Result.success();
+    }
+
     // 获取文件夹及其子文件信息
     @GetMapping("/folderData")
     @CrossOrigin
