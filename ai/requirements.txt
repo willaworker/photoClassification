@@ -1,0 +1,9 @@
+Flask
+flask-cors
+Pillow
+torch
+transformers
+rawpy== 0.21.0
+numpy==1.26.4
+geopy
+exifread
