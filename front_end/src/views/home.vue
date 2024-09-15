@@ -8,7 +8,6 @@ import {
   nextTick,
 } from "vue";
 import axios from "axios";
-// import EXIF from 'exif-js';
 import defaultPic from "@/assets/img/default.jpg";
 import userPic1 from "@/assets/img/userPic1.jpg";
 import userPic2 from "@/assets/img/userPic2.jpeg";
