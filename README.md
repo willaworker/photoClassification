@@ -1,28 +1,18 @@
-## **项目运行指南**
+## **项目简介**
 
-**项目前提**：需要18.3或更高版本的node.js，可在windows powershell（管理员）内输入node -v查看，若无，则建议浏览器搜索安装方法。
+#### 项目介绍：
+
+​	本项目为照片分类系统，BIT小学期项目。本项目主要用于将导入的照片根据时间进行分类，并使用ai进行标签识别，同时读取并显示(若有)图片的拍摄设备和地点信息，支持.jpg、.png、.raw、.dng等常规和非常规图片格式，使用vue前端和java后端。
+
+#### 项目预览：
+
+![image-20240915213418121](C:\Users\will\AppData\Roaming\Typora\typora-user-images\image-20240915213418121.png)
+
+
 
 #### **前端运行：**
 
-可见front_end文件夹README文件，也可见下文：
-
-打开windows powershell（管理员），运行以下内容：
-
-​	pnpm安装：npm install -g pnpm
-
-使用VScode打开项目文件夹（运行前端部分时打开front_end文件夹），在终端（按ctrl+`快捷键打开）中安装以下内容（均在front_end文件夹中进行安装和运行）：
-
-​	可先运行 pnpm install 安装环境，然后尝试 pnpm dev 启动，若缺少依赖，可根据需求安装以下内容：
-
-​	axios安装：pnpm install axios
-
-​	element plus安装：pnpm install element-plus
-
-​	less安装：pnpm i -D less
-
-​	sass安装：pnpm install sass
-
-安装完毕后输入pnpm dev即可运行项目。
+可见front_end文件夹README文件
 
 测试文件运行：npm run test
 
