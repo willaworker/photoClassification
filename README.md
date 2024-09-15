@@ -6,9 +6,7 @@
 
 #### 项目预览：
 
-![image-20240915213418121](C:\Users\will\AppData\Roaming\Typora\typora-user-images\image-20240915213418121.png)
-
-
+![image-20240915213418121](\预览图\home.png)
 
 #### **前端运行：**
 
